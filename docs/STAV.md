@@ -12,7 +12,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | 4. Admin rozhodování | hotovo |
 | 5. Opravy a historie | hotovo |
 | 6. Discord | hotovo |
-| 7. Zabezpečení a provoz | čeká |
+| 7. Zabezpečení a provoz | hotovo |
 
 ## Etapa 1: Kostra
 
@@ -200,3 +200,49 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 3. Bota pozvat na server s oprávněními View Channel, Send Messages a Embed Links v kanálu oznámení.
 4. Interactions Endpoint URL: `https://<web>/discord/interactions` (Discord ho při uložení ověří PINGem a neplatným podpisem).
 5. `php artisan discord:register-commands`.
+
+## Etapa 7: Zabezpečení a provoz
+
+**Hotovo**
+
+- `SecurityHeaders` na každé odpovědi (SEC-5): CSP bez `unsafe-inline` a `unsafe-eval` (`default-src 'self'`, obrázky i `blob:` pro náhledy a Discord CDN pro avatary, `frame-ancestors 'none'`, `form-action 'self'`, `object-src 'none'`), HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP. Důkazy si nechávají vlastní přísnější CSP se `sandbox`. Při `npm run dev` v local prostředí se povolí Vite dev server.
+- `AssignRequestId`: každý request má ID (převezme rozumné `X-Request-Id` od proxy), je v každém řádku logu i v odpovědi (NF-5).
+- Logy: kanál `json` (JSON na stderr, výchozí v Dockeru) a `json_file`. Všechny kanály mají tap `RedactSecrets`, který z textu i kontextu odstraní bot token, client secret, APP_KEY a heslo DB (SEC-4).
+- Rate limity (SEC-1): žádosti 10 za hodinu a 30 za den na hráče, přihlášení 10 za minutu na IP, interactions 120 za minutu na IP.
+- `TRUSTED_PROXIES` pro provoz za TLS proxy, v produkci se odkazy generují s `https://`.
+- Zálohy: `backup:run` (SQLite `VACUUM INTO` nebo `pg_dump`, gzip, zrcadlo důkazů, retence 30 dní, disk `BACKUP_DISK`), `backup:verify` (obnova do dočasného souboru, `PRAGMA integrity_check`, kontrola, že zrcadlo obsahuje všechny originály). Plánovač: záloha denně ve 3:30, zkouška obnovy každé pondělí. Postup ruční obnovy je v README.
+- České stránkování (`lang/cs.json`).
+- Kontrola v prohlížeči (headless Chrome přes DevTools Protocol, protože rozšíření Claude in Chrome bylo odpojené): pod přísnou CSP funguje Alpine (přepnutí druhu, výběr statu, upload s náhledy, odmítnutí GIF v prohlížeči, počítadlo poznámky, lupa), konzole bez chyb a porušení CSP, na šířce 390 px bez vodorovného posuvníku. Opravené vizuální vady: přetékající „Zamčeno Zažádat“ v přehledu (akce je teď ikona plus, text je v `aria-label`) a zalomené ID ve frontě admina.
+- Testy (174).
+
+**Rozhodnutí**
+
+- HSTS se posílá vždy (prohlížeč ho přes HTTP ignoruje), aby to platilo pro všechny stránky bez ohledu na proxy.
+- Zálohy PostgreSQL potřebují v kontejneru `pg_dump` (Docker obraz ho kvůli velikosti nemá, výchozí je SQLite). Automatická zkouška obnovy umí jen SQLite snapshoty.
+- Off-site kopie: `BACKUP_DISK` může být S3 kompatibilní disk (vyžaduje balík `league/flysystem-aws-s3-v3`) nebo připojený vzdálený svazek.
+
+## Akceptační kritéria → testy
+
+| Kritérium ze zadání | Test |
+| --- | --- |
+| Seed založí 54 milníků, unikátní kódy, 9 × 6, hodnota 250 | `tests/Feature/Setup/MilestoneSeedTest.php` |
+| Web i `/genetic overview` ukazují V / 54 a 150 + 25 × V, při V = 54 je to 1500 | `Progress/ClusterProgressTest.php`, `Discord/InteractionsTest.php` |
+| Dva admini současně: ověřený je právě jeden, druhý dostane chybu, progres +1 | `Admin/ConcurrentApprovalTest.php` (dva procesy), `Admin/ReviewTest.php` |
+| Zrušení verifikace: progres −1, Indo −25, SUPERSEDED → PENDING, úprava zprávy na Discordu, audit | `Admin/CorrectionsTest.php`, `Discord/OutboxTest.php` |
+| Změna jména na Discordu: historie zůstane, nové jméno, v detailu i původní | `Auth/DiscordLoginTest.php`, `Admin/CorrectionsTest.php` (HIS-3) |
+| Upload odmítne PHP jako .png, SVG, GIF, soubor nad limit, 11. obrázek, nad 40 Mpx | `Submissions/SubmitClaimTest.php` |
+| Obrázek ověřeného milníku bez přihlášení ano, čekajícího ne (ani jiný hráč), `nosniff` | `Submissions/EvidenceAccessTest.php` |
+| Hráč dostane 403 na všech admin adresách, po odebrání role do 10 minut | `Security/SecurityTest.php` (všechny routy `admin.*`), `Auth/MembershipRefreshTest.php`, `Admin/ReviewTest.php` |
+| Admin neschválí vlastní claim při `ALLOW_SELF_APPROVE=false` | `Admin/ReviewTest.php` |
+| Výpadek Discordu: schválení projde, oznámení odejde po obnovení právě jednou | `Discord/OutboxTest.php` |
+| Interactions: PING, neplatný podpis 401, odpověď do 1 s | `Discord/InteractionsTest.php` |
+| Celá sada na SQLite i PostgreSQL | `.github/workflows/tests.yml` (lokálně ověřeno jen SQLite) |
+
+## Co zůstává otevřené
+
+- **PostgreSQL**: sada lokálně běžela jen na SQLite. Lokální PostgreSQL server se mi nepodařilo spustit (spuštění serveru nebylo povolené). Ověří ho první běh GitHub Actions. Největší riziko je PostgreSQL trigger pro audit log v migraci `2026_11_14_000400`.
+- **Docker obraz** nebyl sestaven (Docker na vývojovém stroji není).
+- **GitHub remote**: repozitář je jen lokální, CI zatím neběželo.
+- **Skutečný Discord**: OAuth, bot a interakce jsou ověřené jen proti mockům. Při prvním nasazení projít postup v části Etapa 6.
+- **Verze 1.1**: DM hráči o rozhodnutí (DC-6).
+- Otázky ze zadání, u kterých platí výchozí odpověď: souběžné claimy rozhoduje admin (pořadí a potvrzení pozdějšího), self-approve řídí `ALLOW_SELF_APPROVE`, jméno objevitele je přezdívka na serveru, bez sezón, 250 jsou body včetně mutací.

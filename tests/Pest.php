@@ -25,6 +25,9 @@ pest()->extend(TestCase::class)
 
 pest()->extend(TestCase::class)->in('Unit');
 
+// Integration tests manage their own (file based) database.
+pest()->extend(TestCase::class)->in('Integration');
+
 /*
 |--------------------------------------------------------------------------
 | Helpers

@@ -38,7 +38,7 @@ class EvidenceController extends Controller
             'Content-Length' => (string) $disk->size($path),
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, max-age=3600',
-            'Content-Security-Policy' => "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox",
+            'Content-Security-Policy' => "default-src 'none'; img-src 'self'; sandbox",
             'Cross-Origin-Resource-Policy' => 'same-origin',
         ];
 

@@ -21,14 +21,14 @@
     </a>
 @elseif ($state === $P::PENDING)
     <a href="{{ $claimUrl }}" class="cell justify-between border border-dashed border-wait/60 text-[13px] text-wait-dim hover:text-wait-text" aria-label="{{ __('dashboard.grid.aria_pending', ['milestone' => $title]) }}">
-        <span class="flex items-center gap-1.5"><x-icon.hourglass :size="14" />{{ __('dashboard.grid.in_review') }}</span><span class="font-semibold text-ok-text">{{ __('dashboard.grid.claim') }}</span>
+        <span class="flex items-center gap-1.5"><x-icon.hourglass :size="14" />{{ __('dashboard.grid.in_review') }}</span><x-icon.plus class="text-ok-text" />
     </a>
 @elseif ($state === $P::MINE_REJECTED)
     <a href="{{ $claimUrl }}" class="cell justify-between border border-bad/60 text-[13px] text-bad-text hover:text-bad-text" aria-label="{{ __('dashboard.grid.aria_mine_rejected', ['milestone' => $title]) }}">
-        <span class="flex items-center gap-1.5"><x-icon.x :size="14" />{{ __('dashboard.grid.rejected') }}</span><span class="font-semibold text-ok-text">{{ __('dashboard.grid.retry') }}</span>
+        <span class="flex items-center gap-1.5"><x-icon.x :size="14" />{{ __('dashboard.grid.rejected') }}</span><x-icon.plus class="text-ok-text" />
     </a>
 @else
     <a href="{{ $claimUrl }}" class="cell justify-between border border-line-head bg-sunken text-[13px] text-ink-3 hover:text-ink-2" aria-label="{{ __('dashboard.grid.aria_locked', ['milestone' => $title]) }}">
-        <span class="flex items-center gap-1.5"><x-icon.lock :size="14" />{{ __('dashboard.grid.locked') }}</span><span class="font-semibold text-ok-text">{{ __('dashboard.grid.claim') }}</span>
+        <span class="flex items-center gap-1.5"><x-icon.lock :size="14" />{{ __('dashboard.grid.locked') }}</span><x-icon.plus class="text-ok-text" />
     </a>
 @endif

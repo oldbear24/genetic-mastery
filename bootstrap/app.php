@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\RefreshDiscordMembership;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +20,16 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(AssignRequestId::class);
+        $middleware->append(SecurityHeaders::class);
+
+        // Behind a TLS-terminating proxy: TRUSTED_PROXIES=* (or a list of IPs),
+        // so HTTPS, client IPs (rate limits) and secure cookies work.
+        $trusted = env('TRUSTED_PROXIES');
+        if (filled($trusted)) {
+            $middleware->trustProxies(at: $trusted === '*' ? '*' : array_map('trim', explode(',', $trusted)));
+        }
+
         $middleware->web(append: [
             RefreshDiscordMembership::class,
         ]);

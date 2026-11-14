@@ -47,7 +47,7 @@ RUN chmod +x /usr/local/bin/entrypoint \
 
 ENV APP_ENV=production \
     APP_DEBUG=false \
-    LOG_CHANNEL=stderr \
+    LOG_CHANNEL=json \
     DB_DATABASE=/var/www/html/storage/database/database.sqlite
 
 EXPOSE 80

@@ -67,6 +67,14 @@ return [
 
     'player_note_max' => 1000,
 
+    // Daily database snapshot and evidence mirror. Point BACKUP_DISK at an
+    // off-site disk (S3 compatible storage or a mounted volume) in production.
+    'backup' => [
+        'disk' => env('BACKUP_DISK', 'local'),
+        'path' => env('BACKUP_PATH', 'backups'),
+        'retention_days' => (int) env('BACKUP_RETENTION_DAYS', 30),
+    ],
+
     'rate_limits' => [
         'submissions_per_hour' => 10,
         'submissions_per_day' => 30,

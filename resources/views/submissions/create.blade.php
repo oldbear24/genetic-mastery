@@ -56,7 +56,7 @@
             {{-- 1: species --}}
             <fieldset class="m-0 flex flex-col gap-3 border-0 p-0">
                 <legend class="mb-3 flex items-center gap-2.5 p-0 text-base font-semibold"><span class="{{ $stepNumber }}">1</span>{{ __('submissions.form.step_species') }}</legend>
-                <div class="grid grid-cols-[repeat(auto-fit,minmax(min(180px,100%),1fr))] gap-2.5">
+                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
                     @foreach ($grid as $code => $row)
                         <label class="relative cursor-pointer">
                             <input type="radio" name="species" value="{{ $code }}" x-model="species" class="peer sr-only" @checked($code === $selectedSpecies)>

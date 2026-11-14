@@ -30,7 +30,7 @@
                            ])>
                             <span class="flex w-full justify-between gap-2">
                                 <span class="font-semibold">{{ $item->milestone->title() }}</span>
-                                <span class="font-mono text-xs text-ink-label">{{ $item->public_id }}</span>
+                                <span class="shrink-0 font-mono text-xs whitespace-nowrap text-ink-label">{{ $item->public_id }}</span>
                             </span>
                             <span class="text-[13px] text-ink-2">{{ __('admin.queue.item_meta', [
                                 'player' => $item->user->display_name,

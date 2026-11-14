@@ -1,5 +1,7 @@
 <?php
 
+use App\Logging\RedactSecrets;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -58,11 +60,37 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        // Structured JSON on stderr for Docker (NF-5). Every line carries the
+        // request ID from the AssignRequestId middleware.
+        'json' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'info'),
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => 'php://stderr',
+            ],
+            'formatter' => JsonFormatter::class,
+            'processors' => [PsrLogMessageProcessor::class],
+            'tap' => [RedactSecrets::class],
+        ],
+
+        // JSON lines in a file, rotated daily.
+        'json_file' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/genetic.jsonl'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'formatter' => JsonFormatter::class,
+            'replace_placeholders' => true,
+            'tap' => [RedactSecrets::class],
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
+            'tap' => [RedactSecrets::class],
         ],
 
         'daily' => [
@@ -71,6 +99,7 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'max_files' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
+            'tap' => [RedactSecrets::class],
         ],
 
         'monthly' => [
@@ -111,6 +140,7 @@ return [
             ],
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'processors' => [PsrLogMessageProcessor::class],
+            'tap' => [RedactSecrets::class],
         ],
 
         'syslog' => [

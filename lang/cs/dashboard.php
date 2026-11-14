@@ -30,8 +30,6 @@ return [
         'in_review' => 'Čeká',
         'rejected' => 'Zamítnuto',
         'locked' => 'Zamčeno',
-        'claim' => 'Zažádat',
-        'retry' => 'Znovu',
         'aria_mine_verified' => ':milestone: ověřeno, váš objev',
         'aria_verified' => ':milestone: ověřeno, objevitel :name',
         'aria_mine_pending' => ':milestone: vaše žádost čeká na schválení',
