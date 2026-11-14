@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Http;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -12,5 +13,8 @@ abstract class TestCase extends BaseTestCase
 
         // Tests render Blade views without a Vite build.
         $this->withoutVite();
+
+        // Discord is always faked; a request without a fake fails the test.
+        Http::preventStrayRequests();
     }
 }

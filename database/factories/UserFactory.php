@@ -25,6 +25,7 @@ class UserFactory extends Factory
             'is_member' => true,
             'roles_checked_at' => now(),
             'last_login_at' => now(),
+            'remember_token' => null,
         ];
     }
 

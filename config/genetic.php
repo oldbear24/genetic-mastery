@@ -14,7 +14,8 @@
 
 return [
 
-    'cluster_name' => env('CLUSTER_NAME', 'ARK cluster'),
+    // Shown under the logo as "<name> · ARK cluster"; without it just "ARK cluster".
+    'cluster_name' => env('CLUSTER_NAME'),
 
     'species' => [
         'REX' => 'Rex',

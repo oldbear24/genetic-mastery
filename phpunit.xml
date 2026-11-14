@@ -19,6 +19,19 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_URL" value="https://genetic.test"/>
+        <env name="APP_LOCALE" value="cs"/>
+        <env name="APP_FALLBACK_LOCALE" value="cs"/>
+        <env name="DISCORD_CLIENT_ID" value="100000000000000001"/>
+        <env name="DISCORD_CLIENT_SECRET" value="test-client-secret"/>
+        <env name="DISCORD_REDIRECT_URI" value="https://genetic.test/auth/discord/callback"/>
+        <env name="DISCORD_BOT_TOKEN" value="test-bot-token"/>
+        <env name="DISCORD_GUILD_ID" value="200000000000000002"/>
+        <env name="DISCORD_ANNOUNCE_CHANNEL_ID" value="300000000000000003"/>
+        <env name="ADMIN_ROLE_IDS" value="900000000000000009"/>
+        <env name="ADMIN_USER_IDS" value=""/>
+        <env name="ALLOW_SELF_APPROVE" value="false"/>
+        <env name="FILESYSTEM_DISK" value="local"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

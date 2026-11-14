@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Carbon;
 
@@ -43,6 +44,11 @@ class User extends Authenticatable
             'roles_checked_at' => 'datetime',
             'last_login_at' => 'datetime',
         ];
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 
     public function isAdmin(): bool

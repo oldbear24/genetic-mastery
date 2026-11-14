@@ -1,0 +1,2 @@
+@props(['size' => 30])
+<svg {{ $attributes->merge(['class' => 'shrink-0 text-ok']) }} width="{{ $size }}" height="{{ $size }}" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M8 3C8 9 20 9 20 14C20 19 8 19 8 25"/><path d="M20 3C20 9 8 9 8 14C8 19 20 19 20 25"/><path d="M10 14H18"/><path d="M10.5 4.5H17.5"/><path d="M10.5 23.5H17.5"/></svg>

@@ -1,9 +1,180 @@
 @import 'tailwindcss';
 
+/* Self-hosted fonts (Latin + Latin Extended for Czech), no third-party requests. */
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-ext-400.css';
+@import '@fontsource/inter/latin-500.css';
+@import '@fontsource/inter/latin-ext-500.css';
+@import '@fontsource/inter/latin-600.css';
+@import '@fontsource/inter/latin-ext-600.css';
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-ext-500.css';
+@import '@fontsource/space-grotesk/latin-600.css';
+@import '@fontsource/space-grotesk/latin-ext-600.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import '@fontsource/space-grotesk/latin-ext-700.css';
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-ext-400.css';
+@import '@fontsource/jetbrains-mono/latin-600.css';
+@import '@fontsource/jetbrains-mono/latin-ext-600.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/* Design tokens from design/README.md */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    --color-page: #0E1214;
+    --color-surface: #151B1E;
+    --color-raised: #1B2327;
+    --color-sunken: #12171A;
+    --color-line: #263036;
+    --color-line-soft: #1F282C;
+    --color-line-head: #222B30;
+
+    --color-ink: #E8EEF0;
+    --color-ink-2: #A4B1B6;
+    --color-ink-3: #7F8E94;
+    --color-ink-label: #9AA8AE;
+
+    --color-ok: #45D19E;
+    --color-ok-text: #7EE3BC;
+    --color-ok-hover: #A9F0D3;
+    --color-ok-on: #062A1D;
+
+    --color-wait: #F2B24C;
+    --color-wait-text: #F5C77A;
+    --color-wait-dim: #D9B77E;
+    --color-wait-on: #241703;
+
+    --color-bad: #F08A7E;
+    --color-bad-text: #F6B1A8;
+}
+
+@layer base {
+    html {
+        color-scheme: dark;
+    }
+
+    body {
+        @apply bg-page text-ink font-sans text-[15px] leading-normal antialiased;
+    }
+
+    a {
+        @apply text-ok-text hover:text-ok-hover;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-ok-text);
+        outline-offset: 2px;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+/* Reusable component classes (Tailwind v4 utilities, so they can be @apply-ed). */
+@utility card {
+    @apply rounded-2xl border border-line bg-surface;
+}
+
+@utility label-caps {
+    @apply font-display text-sm font-semibold tracking-[0.14em] text-ink-label uppercase;
+}
+
+@utility nav-link {
+    @apply rounded-lg px-3.5 py-2.5 font-medium text-ink-2 no-underline hover:text-ink;
+
+    &[aria-current='page'] {
+        @apply bg-raised text-ink;
+    }
+}
+
+@utility btn {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 font-semibold no-underline transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+    @apply btn bg-ok text-ok-on hover:bg-ok-text hover:text-ok-on;
+}
+
+@utility btn-light {
+    @apply btn bg-ink text-page hover:bg-white hover:text-page;
+}
+
+@utility btn-ghost {
+    @apply btn border border-line bg-transparent font-medium text-ink hover:border-ink-3 hover:text-ink;
+}
+
+@utility btn-danger {
+    @apply btn border border-bad bg-transparent text-bad-text hover:bg-bad/10 hover:text-bad-text;
+}
+
+@utility link-underline {
+    @apply underline underline-offset-2;
+}
+
+@utility field {
+    @apply w-full rounded-lg border border-line bg-sunken px-3.5 py-2.5 text-ink placeholder:text-ink-3 focus:border-ok focus:outline-none;
+}
+
+@utility badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-[0.06em] uppercase whitespace-nowrap;
+}
+
+@utility badge-pending {
+    @apply badge border border-dashed border-wait/75 text-wait-text;
+}
+
+@utility badge-verified {
+    @apply badge border border-ok/60 bg-ok/10 text-ok-text;
+}
+
+@utility badge-rejected {
+    @apply badge border border-bad/70 text-bad-text;
+}
+
+@utility badge-muted {
+    @apply badge border border-line text-ink-2;
+}
+
+/* Milestone cells: state is never shown by colour alone (icon + text, NF-7). */
+@utility cell {
+    @apply flex min-h-11 items-center gap-2 rounded-[10px] px-2.5 py-[7px] no-underline;
+}
+
+@utility cell-verified {
+    @apply cell border border-ok/50 bg-ok/13 text-ink hover:border-ok hover:text-ink;
+}
+
+@utility cell-pending {
+    @apply cell border border-dashed border-wait/75 text-wait-text hover:text-wait-text;
+}
+
+@utility cell-locked {
+    @apply cell border border-line-head bg-sunken text-ink-3 hover:border-line hover:text-ink-2;
+}
+
+@utility cell-rejected {
+    @apply cell border border-bad/70 text-bad-text hover:text-bad-text;
+}
+
+@utility alert {
+    @apply rounded-xl border px-4 py-3 text-sm;
+}
+
+@utility alert-error {
+    @apply alert border-bad/60 bg-bad/10 text-bad-text;
+}
+
+@utility alert-success {
+    @apply alert border-ok/50 bg-ok/10 text-ok-text;
+}
+
+@utility alert-warning {
+    @apply alert border-dashed border-wait/75 bg-wait/5 text-wait-text;
 }
