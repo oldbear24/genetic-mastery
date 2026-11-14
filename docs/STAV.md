@@ -11,7 +11,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | 3. Submission a upload | hotovo |
 | 4. Admin rozhodování | hotovo |
 | 5. Opravy a historie | hotovo |
-| 6. Discord | čeká |
+| 6. Discord | hotovo |
 | 7. Zabezpečení a provoz | čeká |
 
 ## Etapa 1: Kostra
@@ -166,3 +166,37 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 **Opravená chyba**
 
 - Popisky akcí v historii změn se zobrazovaly jako surový klíč. Příčina výše, test překladů to teď hlídá obecně.
+
+## Etapa 6: Discord
+
+**Hotovo**
+
+- `DiscordMessages`: oznámení NOVÝ GENETICKÝ MILNÍK jako embed (druh, stat, hodnota, objevitel, progres, Indo Potential, odkaz na detail), zmínka objevitele s `allowed_mentions` jen na něj (DC-2), úprava původní zprávy na „OVĚŘENÍ ZRUŠENO ~~…~~“ a oprava s novým progresem jako odpověď na původní zprávu (DC-3). Jména hráčů se escapují, aby nešlo podstrčit Markdown ani zmínku.
+- `OutboxSender` a příkaz `discord:send-outbox` (plánovač každou minutu, `withoutOverlapping`):
+  - řádek si runner bere podmíněným updatem `pending → sending`, takže ho nikdy nepošlou dva,
+  - vytvoření zprávy nese `nonce` s `enforce_nonce`, takže opakování po ztracené odpovědi nevytvoří duplicitu (DC-5),
+  - chyba vrátí řádek do `pending` s rostoucí pauzou 30 s, 1 min, 2 min … nejvýš hodina, 429 respektuje `retry_after`, po 20 pokusech `failed` (DC-4),
+  - `message_id` se uloží do outboxu i do `submissions.discord_message_id`,
+  - řádky zaseknuté ve stavu `sending` déle než 5 minut se vrátí do fronty,
+  - úprava a oprava čekají, dokud původní oznámení neodejde; když nikdy neodešlo, zruší se. Smazaná původní zpráva (404) skončí jako `failed`.
+- Interactions endpoint `POST /discord/interactions` mimo skupinu `web` (bez session, cookies a CSRF), ověření Ed25519 přes `sodium_crypto_sign_verify_detached` (neplatný nebo chybějící podpis 401), PING → PONG, rate limit 120 za minutu.
+- `/genetic overview` (progres, Indo Potential, textový progress bar), `/genetic progress [druh]`, `/genetic leaderboard` (top 10), `/genetic milestone <druh> <stat>` (jen volající, příznak 64). Všechny odpovědi mají `allowed_mentions.parse = []`.
+- `php artisan discord:register-commands` zaregistruje `/genetic` jako guild příkaz (bulk overwrite) s českými popisy a volbami druhů a statů.
+- Detail milníku ukazuje „oznámeno na Discordu“, jakmile oznámení odejde.
+- Testy (159), mimo jiné akceptační kritéria: při výpadku Discordu schválení projde a oznámení odejde po obnovení právě jednou, zrušení verifikace upraví zprávu na Discordu, interactions endpoint odpoví na PING, neplatný podpis odmítne 401 a na příkazy odpovídá do 1 s, `/genetic overview` ukazuje V / 54 a 150 + 25 × V (i 1500 při V = 54).
+
+**Rozhodnutí**
+
+- Text zprávy se skládá až při odeslání z čísel uložených při schválení. Oznámení tak ukazuje progres v okamžiku schválení, ne v okamžiku odeslání.
+- Oprava po zrušení je odpověď (`message_reference`) na původní oznámení, aby byla v kanálu vidět souvislost.
+- Volby slash příkazu se jmenují `druh` a `stat` (česky, jak je v zadání `/genetic progress [druh]`), hodnoty jsou kódy druhů a statů.
+- Stáří časového razítka u interakcí se nekontroluje (Discord to nevyžaduje a příkazy jen čtou).
+- DM hráči o rozhodnutí (DC-6) je podle zadání až verze 1.1.
+
+**Nasazení Discordu (postup)**
+
+1. V Discord Developer Portal vytvořit aplikaci s botem, do `.env` dát `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_BOT_TOKEN`, `DISCORD_PUBLIC_KEY`, `DISCORD_GUILD_ID`, `DISCORD_ANNOUNCE_CHANNEL_ID`.
+2. OAuth2 redirect: `https://<web>/auth/discord/callback`.
+3. Bota pozvat na server s oprávněními View Channel, Send Messages a Embed Links v kanálu oznámení.
+4. Interactions Endpoint URL: `https://<web>/discord/interactions` (Discord ho při uložení ověří PINGem a neplatným podpisem).
+5. `php artisan discord:register-commands`.

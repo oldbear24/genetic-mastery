@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Discord announcements, edits and corrections from the outbox (DC-4).
+Schedule::command('discord:send-outbox')->everyMinute()->withoutOverlapping(5);
