@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Middleware\RelocateUnreadableUploads;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -45,7 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/submissions', [SubmissionController::class, 'index'])->name('submissions.index');
     Route::get('/submissions/new', [SubmissionController::class, 'create'])->name('submissions.create');
-    Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
+    Route::post('/submissions', [SubmissionController::class, 'store'])
+        ->middleware(RelocateUnreadableUploads::class)
+        ->name('submissions.store');
     Route::post('/submissions/{submission:public_id}/withdraw', [SubmissionController::class, 'withdraw'])->name('submissions.withdraw');
 });
 

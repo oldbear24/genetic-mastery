@@ -1,0 +1,28 @@
+<?php
+
+/*
+ * Front controller for hosting where the web root cannot point at public/
+ * (WEDOS webhosting). The application lives outside the web root; this file
+ * and the assets are the only things in it. Written by scripts/build-wedos.php.
+ */
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+$appRoot = __DIR__.'/{{APP_PATH}}';
+
+if (file_exists($maintenance = $appRoot.'/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+require $appRoot.'/vendor/autoload.php';
+
+/** @var Application $app */
+$app = require_once $appRoot.'/bootstrap/app.php';
+
+// Assets (build/manifest.json, favicon) are next to this file.
+$app->usePublicPath(__DIR__);
+
+$app->handleRequest(Request::capture());

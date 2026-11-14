@@ -31,6 +31,19 @@ class OutboxSender
         private readonly DiscordMessages $messages,
     ) {}
 
+    /**
+     * With DISCORD_SEND_AFTER_RESPONSE the outbox is sent once the admin's
+     * response has gone out (fastcgi_finish_request), so announcements do
+     * not wait for a cron that runs only every few minutes. The decision
+     * itself never waits for Discord; failures are retried by the cron.
+     */
+    public static function sendAfterResponse(): void
+    {
+        if (config('genetic.discord_send_after_response')) {
+            defer(fn () => app(self::class)->run(10), 'discord-outbox');
+        }
+    }
+
     /** @return array{sent: int, retried: int, failed: int, cancelled: int, skipped: int} */
     public function run(int $limit = 20): array
     {

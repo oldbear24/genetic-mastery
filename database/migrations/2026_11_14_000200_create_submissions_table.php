@@ -43,12 +43,36 @@ return new class extends Migration
             $table->index(['status', 'submitted_at']);
         });
 
-        // Integrity rules enforced by the database, not only by code. Partial
-        // unique indexes have the same syntax in SQLite and PostgreSQL.
+        // Integrity rules enforced by the database, not only by code:
         //  - a milestone has at most one VERIFIED submission
         //  - a player has at most one PENDING claim per milestone
-        DB::statement("CREATE UNIQUE INDEX submissions_one_verified_per_milestone ON submissions (milestone_id) WHERE status = 'verified'");
-        DB::statement("CREATE UNIQUE INDEX submissions_one_pending_per_player ON submissions (milestone_id, user_id) WHERE status = 'pending'");
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            $this->mysqlUniqueRules();
+        } else {
+            // Partial unique indexes have the same syntax in SQLite and PostgreSQL.
+            DB::statement("CREATE UNIQUE INDEX submissions_one_verified_per_milestone ON submissions (milestone_id) WHERE status = 'verified'");
+            DB::statement("CREATE UNIQUE INDEX submissions_one_pending_per_player ON submissions (milestone_id, user_id) WHERE status = 'pending'");
+        }
+    }
+
+    /**
+     * MySQL and MariaDB have no partial indexes. The same rules come from
+     * stored generated columns that hold the key only in the given state
+     * (NULL otherwise) plus a unique index; NULLs never collide.
+     */
+    private function mysqlUniqueRules(): void
+    {
+        Schema::table('submissions', function (Blueprint $table) {
+            $table->unsignedBigInteger('verified_milestone_key')->nullable()
+                ->storedAs("CASE WHEN `status` = 'verified' THEN `milestone_id` END");
+            $table->unsignedBigInteger('pending_milestone_key')->nullable()
+                ->storedAs("CASE WHEN `status` = 'pending' THEN `milestone_id` END");
+            $table->unsignedBigInteger('pending_user_key')->nullable()
+                ->storedAs("CASE WHEN `status` = 'pending' THEN `user_id` END");
+
+            $table->unique('verified_milestone_key', 'submissions_one_verified_per_milestone');
+            $table->unique(['pending_milestone_key', 'pending_user_key'], 'submissions_one_pending_per_player');
+        });
     }
 
     public function down(): void

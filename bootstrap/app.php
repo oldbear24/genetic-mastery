@@ -15,8 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            // Discord interactions live outside the "web" group (no session, no CSRF).
+            // Discord interactions and ops hooks live outside the "web" group
+            // (no session, no CSRF): they authenticate with signatures or tokens.
             Route::group([], base_path('routes/discord.php'));
+            Route::group([], base_path('routes/ops.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

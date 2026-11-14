@@ -238,8 +238,39 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | Interactions: PING, neplatný podpis 401, odpověď do 1 s | `Discord/InteractionsTest.php` |
 | Celá sada na SQLite i PostgreSQL | `.github/workflows/tests.yml` (lokálně ověřeno jen SQLite) |
 
+## Nasazení na WEDOS a MySQL/MariaDB (po etapě 7)
+
+Požadavek: nasadit na WEDOS s MySQL nebo SQLite. Návod je v `docs/NASAZENI-WEDOS.md`.
+
+**Zjištěno o WEDOS webhostingu** (veřejná phpinfo stránka WEDOS a znalostní báze, 14. 11. 2026): PHP 8.4.27 (volitelně 8.0–8.5), `sodium`, GD s WebP, `pdo_mysql`, `pdo_sqlite` (SQLite 3.40), `exif`, `intl`; NoLimit `memory_limit` 512 MB, upload 256 MB, `max_file_uploads` 20; zakázané `exec`, `proc_open`, `putenv`, `symlink`; `open_basedir` na adresář hostingu; Apache s `.htaccess`; MariaDB 10.11; cron jen jako volání PHP skriptu přes URL (základ 3 úlohy a 1× za hodinu, CRON+ 10 úloh a 5 minut); SSH nemá.
+
+**Hotovo**
+
+- MySQL a MariaDB: pravidla „jedna VERIFIED na milník“ a „jedna PENDING na hráče a milník“ přes uložené generované sloupce (`verified_milestone_key`, `pending_milestone_key`, `pending_user_key`) s unikátními indexy. SQLite a PostgreSQL dál používají částečné indexy. Triggery audit logu pro MySQL vzniknou, jen když má uživatel právo TRIGGER, jinak migrace pokračuje a audit chrání model. Spojení v UTC a InnoDB.
+- CI: matice SQLite, PostgreSQL 17, MySQL 8.4 a MariaDB 10.11.
+- `Maintenance::tick()` a `maintenance:tick`: outbox, záloha podle stáří posledního snapshotu (`BACKUP_EVERY_HOURS`), zkouška obnovy jednou za 7 dní, vše v jednom procesu se zámkem. Plánovač volá `Schedule::call` místo `Schedule::command`, takže nepotřebuje `proc_open`.
+- Provozní endpointy mimo skupinu `web` (`routes/ops.php`), chráněné tokeny z `.env` (bez tokenu 404, rate limit): `/ops/cron/{CRON_TOKEN}` a `/ops/deploy/{check|migrate|optimize|clear|discord-commands}/{DEPLOY_TOKEN}`, `POST /ops/deploy/upload-test/{DEPLOY_TOKEN}`. `migrate` založí i prázdný SQLite soubor.
+- `EnvironmentCheck` (a `php artisan ops:check`): PHP a rozšíření, GD formáty, databáze a migrace, zapisovatelné adresáře, build frontendu, limity uploadu a paměti, `proc_open`, `open_basedir`, `.env` (bez hodnot tajných údajů), bot token proti Discordu.
+- Zálohy: MySQL a MariaDB dump v PHP (schéma, data bez generovaných sloupců, triggery bez DEFINER), manifest u každé zálohy, zkouška obnovy pro SQLite (obnova a `integrity_check`) i MySQL (počty řádků proti manifestu). Dočasné soubory v `storage/app/tmp` kvůli `open_basedir`.
+- `RelocateUnreadableUploads`: když PHP nesmí číst dočasný soubor uploadu (`open_basedir`), přesune ho do `storage/app/tmp` a po requestu smaže.
+- Relativní `DB_DATABASE` pro SQLite se počítá od kořene aplikace. Rate limity jedou přes souborovou cache (fungují i před první migrací).
+- `scripts/build-wedos.php`: balíček `build/wedos/genetic-mastery/` (aplikace bez dev závislostí, bez `.env` a dat) a `build/wedos/www/` (`index.php` s `usePublicPath`, `cron.php`, `.htaccess`, assets). Šablona `.env` pro WEDOS v `deploy/wedos/env.example`.
+- Volba `DISCORD_SEND_AFTER_RESPONSE` (odeslání outboxu po odpovědi adminovi), ve výchozím stavu vypnutá.
+- Ověřeno lokální simulací rozložení WEDOS (aplikace vedle web rootu, produkční režim, SQLite): kontrola prostředí, první migrace přes URL, stránka s CSS z `www/build`, `.env` nedostupný z webu, cron přes `/ops/cron` i `cron.php` (včetně první zálohy a zkoušky obnovy), `optimize`, JSON log.
+- Testy: 187 (+2 MySQL testy zálohy, které běží jen v CI).
+
+**Rozhodnutí**
+
+- Na webhostingu doporučuji MariaDB. SQLite ve WAL na síťovém úložišti sdíleného hostingu není bezpečné, alternativa s `DB_JOURNAL_MODE=delete` je v šabloně, ale bez záruky.
+- Vlastní `cron.php` ve web rootu, protože WEDOS cron volá „PHP skript přes URL“ a není jisté, jestli projde hezká URL přes `.htaccess`.
+- Zálohy se řídí stářím posledního snapshotu, ne časem v kalendáři: cron přes URL nezaručí přesný čas spuštění.
+- `DISCORD_SEND_AFTER_RESPONSE` je vypnuté kvůli pravidlu z `CLAUDE.md` a DC-4 („nikdy přímo z requestu“). Bez doplňku CRON+ tak oznámení může čekat až hodinu. **Otevřená otázka pro vlastníka:** zapnout odeslání po odpovědi, nebo si přikoupit CRON+?
+- `CLAUDE.md` doplněno: vše musí fungovat i na MySQL/MariaDB.
+
 ## Co zůstává otevřené
 
+- **MySQL/MariaDB a PostgreSQL**: sada lokálně běžela jen na SQLite (lokální databázový server nemám povolený). MySQL část (generované sloupce, triggery, PHP dump) ověří až CI.
+- **Skutečný WEDOS**: nasazení je ověřené simulací, ne na hostingu. Kontrola `/ops/deploy/check` a test nahrávání ukážou případné rozdíly (hlavně `open_basedir` a dočasné soubory uploadu).
 - **PostgreSQL**: sada lokálně běžela jen na SQLite. Lokální PostgreSQL server se mi nepodařilo spustit (spuštění serveru nebylo povolené). Ověří ho první běh GitHub Actions. Největší riziko je PostgreSQL trigger pro audit log v migraci `2026_11_14_000400`.
 - **Docker obraz** nebyl sestaven (Docker na vývojovém stroji není).
 - **GitHub remote**: repozitář je jen lokální, CI zatím neběželo.

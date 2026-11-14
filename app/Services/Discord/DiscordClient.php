@@ -53,6 +53,21 @@ class DiscordClient
     }
 
     /**
+     * The bot user (GET /users/@me), used by the environment check.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws DiscordUnavailable
+     */
+    public function currentUser(): array
+    {
+        $response = $this->send(fn (PendingRequest $http) => $http->get('/users/@me'));
+        $this->ensureSuccessful($response);
+
+        return $response->json();
+    }
+
+    /**
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      *

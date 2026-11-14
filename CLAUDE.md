@@ -16,7 +16,7 @@ Vzhled: `design/README.md`, obrázky obrazovek v `design/screens/`.
 
 ## Stack
 
-- Laravel 13, SQLite v režimu WAL přes Eloquent. Všechno musí fungovat i na PostgreSQL.
+- Laravel 13, SQLite v režimu WAL přes Eloquent. Všechno musí fungovat i na PostgreSQL a MySQL/MariaDB (nasazení na WEDOS webhosting, viz `docs/NASAZENI-WEDOS.md`).
 - Blade, Tailwind CSS a Alpine.js. Žádná SPA.
 - Přihlášení: Laravel Socialite a `socialiteproviders/discord`, scope `identify`. Členství a role ověřuj bot tokenem přes REST (Get Guild Member).
 - Slash příkazy přes HTTP endpoint `/discord/interactions`, podpis Ed25519 ověřuj přes `sodium_crypto_sign_verify_detached`.

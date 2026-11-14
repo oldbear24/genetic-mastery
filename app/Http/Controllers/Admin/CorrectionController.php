@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\ClusterProgress;
 use App\Services\CorrectionService;
 use App\Services\DecisionRefused;
+use App\Services\Discord\OutboxSender;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -30,6 +31,7 @@ class CorrectionController extends Controller
 
         return $this->attempt(function () use ($request, $submission, $data) {
             $result = $this->corrections->revoke($request->user(), $submission, $data['revoke_reason']);
+            OutboxSender::sendAfterResponse();
 
             return __('corrections.done.revoked', [
                 'id' => $submission->public_id,

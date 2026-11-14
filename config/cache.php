@@ -17,6 +17,10 @@ return [
 
     'default' => env('CACHE_STORE', 'database'),
 
+    // Rate limits use the file store: they work before the first migration
+    // (the deploy hooks are throttled too) and need no database round trip.
+    'limiter' => env('CACHE_LIMITER', 'file'),
+
     /*
     |--------------------------------------------------------------------------
     | Cache Stores

@@ -1,0 +1,25 @@
+<?php
+
+/*
+ * Entry point for the WEDOS cron, which calls a PHP script by URL:
+ *   https://<web>/cron.php?token=<CRON_TOKEN>
+ * It hands the request to the app as /ops/cron/<token>, so the token check,
+ * locking and maintenance are the same as for the pretty URL.
+ * Written by scripts/build-wedos.php.
+ */
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+$appRoot = __DIR__.'/{{APP_PATH}}';
+
+require $appRoot.'/vendor/autoload.php';
+
+/** @var Application $app */
+$app = require_once $appRoot.'/bootstrap/app.php';
+$app->usePublicPath(__DIR__);
+
+$token = is_string($_GET['token'] ?? null) ? $_GET['token'] : '';
+$request = Request::create('/ops/cron/'.rawurlencode($token), 'GET', [], [], [], $_SERVER);
+
+$app->handleRequest($request);

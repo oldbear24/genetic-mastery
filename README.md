@@ -12,8 +12,8 @@ and the Indo Potential. New milestones are announced on Discord, and the
 
 ## Stack
 
-Laravel 13 on PHP 8.4+, SQLite (WAL, `BEGIN IMMEDIATE`) via Eloquent,
-PostgreSQL works too. Blade + Tailwind CSS 4 + Alpine.js (CSP build), fonts
+Laravel 13 on PHP 8.4+, SQLite (WAL, `BEGIN IMMEDIATE`) via Eloquent;
+MySQL / MariaDB and PostgreSQL work too. Blade + Tailwind CSS 4 + Alpine.js (CSP build), fonts
 self-hosted. Discord OAuth2 via Socialite (`identify` scope), membership and
 roles via the bot (REST), announcements through a database outbox sent by the
 scheduler, slash commands via the signed HTTP interactions endpoint. No
@@ -60,8 +60,8 @@ DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_DATABASE=genetic_test \
 DB_USERNAME=genetic DB_PASSWORD=genetic vendor/bin/pest
 ```
 
-GitHub Actions runs the suite on both databases and checks the code style
-with Pint (`.github/workflows/tests.yml`).
+GitHub Actions runs the suite on SQLite, PostgreSQL, MySQL 8.4 and
+MariaDB 10.11 and checks the code style with Pint (`.github/workflows/tests.yml`).
 
 ## Discord setup
 
@@ -84,30 +84,49 @@ docker compose up -d --build
 
 - `app`: nginx + PHP-FPM on port 8080, runs migrations and the milestone seed
   on start.
-- `scheduler`: `php artisan schedule:work` — Discord outbox every minute,
-  backup daily at 03:30, restore test weekly.
+- `scheduler`: `php artisan schedule:work` runs `maintenance:tick` every
+  minute: Discord outbox, a backup when the newest one is older than a day,
+  a restore test weekly. All in-process, no `proc_open` needed.
 - Everything persistent (SQLite database, evidence, logs, backups) lives in
   the `storage` volume.
 - Put a TLS-terminating proxy in front (Discord OAuth and interactions need
   HTTPS); `TRUSTED_PROXIES=*` is set in `docker-compose.yml`.
 - Logs are JSON lines on stderr with a request ID; secrets are redacted.
 
+## Shared hosting (WEDOS)
+
+Hosts without SSH and with a URL-only cron are supported; the Czech guide is
+[`docs/NASAZENI-WEDOS.md`](docs/NASAZENI-WEDOS.md). In short:
+
+- `php scripts/build-wedos.php` builds `build/wedos/genetic-mastery/` (the
+  app, uploaded next to the web root) and `build/wedos/www/` (front
+  controller, `cron.php`, assets).
+- `/ops/deploy/{check|migrate|optimize|clear|discord-commands}/{DEPLOY_TOKEN}`
+  replaces the shell, `/cron.php?token={CRON_TOKEN}` (or `/ops/cron/{token}`)
+  replaces the CLI cron. Without tokens in `.env` these URLs return 404.
+- MariaDB is recommended there; the "verified at most once" rule uses stored
+  generated columns with a unique index on MySQL / MariaDB.
+- `php artisan ops:check` runs the same environment check on hosts with a shell.
+
 ## Backups
 
 `php artisan backup:run` writes a consistent database snapshot
-(`VACUUM INTO` for SQLite, `pg_dump` for PostgreSQL) and mirrors the evidence
+(`VACUUM INTO` for SQLite, a dump written in PHP for MySQL / MariaDB, so no
+`mysqldump` is needed, `pg_dump` for PostgreSQL) and mirrors the evidence
 files to `BACKUP_DISK` under `BACKUP_PATH`, keeping snapshots for 30 days.
 Use an off-site disk in production (S3 compatible storage needs
 `league/flysystem-aws-s3-v3`, or mount a remote volume).
 
-`php artisan backup:verify` restores the newest SQLite snapshot into a scratch
-file, runs `PRAGMA integrity_check` and checks that every evidence original
-it references is in the mirror. Run it once before going live.
+`php artisan backup:verify` checks the newest snapshot: SQLite is restored into
+a scratch file (`PRAGMA integrity_check`), a MySQL dump is read back and its
+rows counted against the manifest; every evidence original has to be in the
+mirror. Run it once before going live.
 
 Restore by hand:
 
 1. Stop the app (`docker compose stop app scheduler`).
 2. `gunzip -c backups/db/genetic-YYYYMMDD-HHMMSS.sqlite.gz > storage/database/database.sqlite`
-   (PostgreSQL: `pg_restore --clean --dbname=… genetic-….pgdump`).
+   (MySQL / MariaDB: import `genetic-….sql.gz` with the mysql client, phpMyAdmin
+   or Adminer; PostgreSQL: `pg_restore --clean --dbname=… genetic-….pgdump`).
 3. Copy `backups/evidence/` back to `storage/app/private/evidence/`.
 4. Start the app again.

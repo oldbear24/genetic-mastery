@@ -10,6 +10,7 @@ use App\Models\SubmissionImage;
 use App\Models\User;
 use App\Services\ClusterProgress;
 use App\Services\DecisionRefused;
+use App\Services\Discord\OutboxSender;
 use App\Services\ReviewService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,6 +58,7 @@ class ReviewController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+        OutboxSender::sendAfterResponse();
         $approved = $result['submission']->load(['milestone', 'user']);
 
         return redirect()->route('admin.queue', $request->only('q'))->with('status', __('admin.result.approved', [

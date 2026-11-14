@@ -49,5 +49,6 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('interactions', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('ops', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
     }
 }

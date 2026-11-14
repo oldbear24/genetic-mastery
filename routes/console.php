@@ -1,10 +1,12 @@
 <?php
 
+use App\Services\Maintenance;
 use Illuminate\Support\Facades\Schedule;
 
-// Discord announcements, edits and corrections from the outbox (DC-4).
-Schedule::command('discord:send-outbox')->everyMinute()->withoutOverlapping(5);
-
-// Daily backup and a weekly restore test.
-Schedule::command('backup:run')->dailyAt('03:30')->withoutOverlapping(60);
-Schedule::command('backup:verify')->weeklyOn(1, '04:30');
+// One in-process maintenance run per minute: Discord outbox (DC-4), daily
+// backup and weekly restore test when they are due. A closure instead of
+// Schedule::command() so nothing needs proc_open. On shared hosting without
+// a CLI cron the same run is triggered by /ops/cron/{token}.
+Schedule::call(fn () => app(Maintenance::class)->tick())
+    ->name('maintenance')
+    ->everyMinute();

@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -81,8 +83,24 @@ return new class extends Migration
         match (DB::getDriverName()) {
             'sqlite' => $this->sqliteTriggers(),
             'pgsql' => $this->pgsqlTrigger(),
+            'mysql', 'mariadb' => $this->mysqlTriggers(),
             default => null,
         };
+    }
+
+    /**
+     * Shared hosting often does not grant the TRIGGER privilege (or needs
+     * SUPER with binary logging). Then the model guard alone protects the
+     * log and the migration says so instead of failing the whole install.
+     */
+    private function mysqlTriggers(): void
+    {
+        try {
+            DB::unprepared("CREATE TRIGGER audit_log_no_update BEFORE UPDATE ON audit_log FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'audit_log is append-only'");
+            DB::unprepared("CREATE TRIGGER audit_log_no_delete BEFORE DELETE ON audit_log FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'audit_log is append-only'");
+        } catch (QueryException $e) {
+            Log::warning('Could not create audit_log triggers; the AuditLog model still refuses updates and deletes.', ['error' => $e->getMessage()]);
+        }
     }
 
     private function sqliteTriggers(): void

@@ -35,7 +35,13 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            // A relative DB_DATABASE (e.g. storage/database/database.sqlite) is
+            // resolved against the app root, so hosting paths need not be known.
+            'database' => (static function (string $database): string {
+                $absolute = $database === ':memory:' || str_starts_with($database, '/') || preg_match('#^[A-Za-z]:[\\\\/]#', $database);
+
+                return $absolute ? $database : base_path($database);
+            })((string) env('DB_DATABASE', database_path('database.sqlite'))),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             // WAL lets readers work while an admin writes; IMMEDIATE takes the
@@ -61,7 +67,9 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
-            'engine' => null,
+            // InnoDB for row locks and transactions, UTC like the rest of the app.
+            'engine' => 'InnoDB',
+            'timezone' => env('DB_TIMEZONE', '+00:00'),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
@@ -81,7 +89,9 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
-            'engine' => null,
+            // InnoDB for row locks and transactions, UTC like the rest of the app.
+            'engine' => 'InnoDB',
+            'timezone' => env('DB_TIMEZONE', '+00:00'),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
