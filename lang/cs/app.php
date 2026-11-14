@@ -62,6 +62,8 @@ return [
         '403_text' => 'Na tuto stránku nemáte oprávnění.',
         '404_title' => 'Stránka nenalezena',
         '404_text' => 'Tahle stránka neexistuje nebo ji nemáte vidět.',
+        '413_title' => 'Soubory jsou příliš velké',
+        '413_text' => 'Všechny obrázky v jedné žádosti smí mít dohromady nejvýš :max MB. Vraťte se a zmenšete je.',
         '419_title' => 'Platnost formuláře vypršela',
         '419_text' => 'Načtěte stránku znovu a zkuste to ještě jednou.',
         '429_title' => 'Příliš mnoho požadavků',

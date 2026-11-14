@@ -6,9 +6,11 @@ use App\Enums\SubmissionStatus;
 use Database\Factories\SubmissionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -33,6 +35,7 @@ use Illuminate\Support\Carbon;
  * @property-read User $user
  * @property-read User|null $reviewer
  * @property-read User|null $revoker
+ * @property-read Collection<int, SubmissionImage> $images
  */
 #[Fillable([
     'milestone_id', 'user_id', 'player_name_snapshot', 'status', 'player_note', 'submitted_at',
@@ -92,6 +95,11 @@ class Submission extends Model
     public function revoker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'revoked_by');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(SubmissionImage::class)->orderBy('position');
     }
 
     public function supersededBy(): BelongsTo

@@ -8,7 +8,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | --- | --- |
 | 1. Kostra | hotovo |
 | 2. Přihlášení a hlavní stránka | hotovo |
-| 3. Submission a upload | čeká |
+| 3. Submission a upload | hotovo |
 | 4. Admin rozhodování | čeká |
 | 5. Opravy a historie | čeká |
 | 6. Discord | čeká |
@@ -79,3 +79,36 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 
 - Detail milníku zatím neukazuje důkazy, historii a admin blok (etapa 3 a 5).
 - Přehled hráče je zatím jen přivítání a počítadla (etapa 3).
+
+## Etapa 3: Submission a upload
+
+**Hotovo**
+
+- Tabulka `submission_images` (UUID `storage_key`, původní jméno jen jako údaj, MIME podle obsahu, rozměry, SHA-256, pořadí, typ `stats` / `ancestry` / `other`).
+- `EvidenceProcessor`: typ podle obsahu (finfo i hlavička obrázku se musí shodovat), limit 15 MB na soubor, rozměry z hlavičky před dekódováním a odmítnutí nad 40 Mpx, originál na disk `local` pod UUID, kopie v plném rozlišení přegenerovaná přes GD (bez EXIF, GPS a textových chunků) a náhled WEBP široký 640 px. Vše přes Laravel Storage.
+- Formulář nové žádosti podle návrhu: druh, stat se stavem (ověřené a vlastní čekající nejdou vybrat), shrnutí kódu milníku, přetažení nebo výběr 1 až 10 screenshotů s náhledem a typem, poznámka s počítadlem do 1000 znaků, ochrana proti dvojímu odeslání. Předvýběr přes `?milestone=KOD`.
+- `SubmissionService`: kontroly SUB-5 (milník není ověřený, hráč nemá jiný čekající claim) před uložením i znovu v transakci se zámkem řádku milníku, limit 10 žádostí za hodinu a 30 za den (počítá se z uložených žádostí), úklid souborů, když se zápis do DB nepovede. Stažení žádosti jako podmíněný update (`WHERE status = 'pending'`).
+- `EvidenceController` na `/evidence/{uuid}/{display|thumb|original}`: kopie ověřených žádostí veřejně, ostatní autor a admin, originál jen admin jako příloha. Hlavičky `Content-Type`, `X-Content-Type-Options: nosniff`, `Cache-Control: private`, vlastní CSP se `sandbox`.
+- `SubmissionPolicy` (zobrazit, stáhnout, originál). Detail žádosti `/submissions/S-000123` s potvrzením po odeslání, důkazy s lupou, důvodem zamítnutí a tlačítkem Stáhnout.
+- Přehled hráče podle návrhu: přivítání se shrnutím, 4 karty (progres, Indo Potential, vlastní objevy, pořadí v žebříčku se shodou), posledních 5 žádostí s akcemi, mřížka s vrstvou „moje“ (Vy, objevitel, Vaše žádost, Čeká + Zažádat, Zamítnuto + Znovu, Zamčeno + Zažádat). Seznam všech vlastních žádostí `/submissions`.
+- Detail ověřeného milníku teď ukazuje i důkazy.
+- Vývojové přihlášení bez Discordu: `php artisan dev:login Joe` vypíše podepsaný odkaz platný 10 minut. Route existuje jen při `APP_ENV=local`, test hlídá, že jinde není.
+- Testy (101): upload a uložení, PNG, JPEG i WEBP, odstranění EXIF a PNG textu, náhled 640 px, odmítnutí PHP souboru přejmenovaného na .png, SVG (i jako .png), GIF (i jako .png), souboru nad 15 MB, 11. obrázku, obrázku nad 40 Mpx a víc než 60 MB celkem, poznámka do 1000 znaků, SUB-5, rate limity, žádná úprava odeslané žádosti, přístup k obrázkům (veřejné ověřené, cizí čekající 403 i bez přihlášení, nosniff, originál jen admin), stažení žádosti, obrázky po změně stavu zůstávají, přehled a vrstva „moje“, formulář.
+
+**Rozhodnutí**
+
+- Kopie pro zobrazení má stejný formát jako originál (PNG zůstane bezeztrátový, aby čísla statů byla čitelná). Náhled je vždy WEBP.
+- Orientace z EXIF se při přegenerování neaplikuje (lokální PHP nemá rozšíření `exif`, screenshoty ze hry ji nemají).
+- Rate limit SEC-1 se počítá z tabulky `submissions`, ne z cache. Neúspěšné pokusy (chybný soubor) se do limitu nepočítají.
+- Hráč ve svém přehledu vidí, kolik dalších žádostí čeká na stejný milník (návrh to ukazuje), nikdy ale kdo.
+- „Zamítnutá žádost k opravě“ je zamítnutí, které je u milníku poslední vlastní žádostí a milník není ověřený.
+- Typ screenshotu jde vybrat jen se zapnutým JavaScriptem. Bez něj se uloží jako „Jiné“.
+- Bezpečnostní CSP celé aplikace přijde v etapě 7. Náhledy v prohlížeči používají `blob:` URL, CSP ho musí povolit v `img-src`.
+
+**Opravená chyba**
+
+- `Auth::login()` čte heslo uživatele. Model `User` teď vrací prázdné heslo (přihlášení je jen přes Discord), jinak by strict mode u uživatele načteného z databáze spadl. Pokrývá to regresní test.
+
+**Chybí nebo zůstává otevřené**
+
+- Vizuální kontrola formuláře a přehledu v prohlížeči neproběhla (rozšíření prohlížeče se během etapy odpojilo). Stránky jsou ověřené testy a HTTP smoke testem včetně odeslání skutečných souborů.

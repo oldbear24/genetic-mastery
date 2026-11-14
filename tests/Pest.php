@@ -5,7 +5,10 @@ use App\Models\Submission;
 use App\Models\User;
 use Database\Seeders\MilestoneSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Testing\TestResponse;
+use Tests\Support\Images;
 use Tests\TestCase;
 
 /*
@@ -78,4 +81,22 @@ function guildMemberPayload(string $discordId, array $roles = [], ?string $nick 
         'roles' => $roles,
         'joined_at' => '2026-01-01T00:00:00.000000+00:00',
     ];
+}
+
+/**
+ * Send a claim as $player through the real form endpoint.
+ *
+ * @param  list<UploadedFile>|null  $images
+ * @param  list<string>  $types
+ */
+function submitClaim(User $player, string $code, ?array $images = null, array $types = [], ?string $note = null): TestResponse
+{
+    $images ??= [Images::png('stats.png'), Images::png('ancestry.png')];
+
+    return test()->actingAs($player)->post(route('submissions.store'), array_filter([
+        'milestone_id' => milestone($code)->id,
+        'images' => $images,
+        'image_types' => $types ?: null,
+        'player_note' => $note,
+    ], fn ($v) => $v !== null));
 }

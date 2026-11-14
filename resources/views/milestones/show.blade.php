@@ -53,8 +53,15 @@
         </section>
     @endif
 
+    @if ($verified && $verified->images->isNotEmpty())
+        <section aria-labelledby="evidence-title" class="card flex flex-col gap-3.5 px-6 py-[22px]">
+            <h2 id="evidence-title" class="m-0 font-display text-xl font-semibold">{{ __('milestones.detail.evidence') }}</h2>
+            <x-evidence-gallery :images="$verified->images" :originals="auth()->user()?->isAdmin() ?? false" />
+        </section>
+    @endif
+
     @auth
-        @if ($state !== \App\Enums\MilestoneState::Verified && Route::has('submissions.create'))
+        @if ($state !== \App\Enums\MilestoneState::Verified)
             <div>
                 <a href="{{ route('submissions.create', ['milestone' => $milestone->code]) }}" class="btn-primary">
                     <x-icon.plus />{{ __('milestones.detail.new_claim') }}

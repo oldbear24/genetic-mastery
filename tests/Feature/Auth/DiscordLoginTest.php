@@ -2,6 +2,7 @@
 
 use App\Models\Submission;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Contracts\Provider;
@@ -177,4 +178,13 @@ it('shows a login page with the Discord button', function () {
 
 it('sends guests from player pages to the login page', function () {
     $this->get(route('dashboard'))->assertRedirect(route('login'));
+});
+
+it('signs in a user loaded from the database (no password column)', function () {
+    $id = User::factory()->create()->id;
+
+    Auth::login(User::query()->findOrFail($id));
+
+    $this->assertAuthenticated();
+    expect(User::query()->findOrFail($id)->getAuthPassword())->toBe('');
 });

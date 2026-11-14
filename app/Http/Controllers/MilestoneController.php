@@ -13,7 +13,7 @@ class MilestoneController extends Controller
      */
     public function show(Milestone $milestone): View
     {
-        $milestone->load(['verifiedSubmission.user', 'verifiedSubmission.reviewer']);
+        $milestone->load(['verifiedSubmission.user', 'verifiedSubmission.reviewer', 'verifiedSubmission.images']);
         $milestone->loadExists(['pendingSubmissions as has_pending']);
 
         return view('milestones.show', [

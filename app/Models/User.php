@@ -51,6 +51,12 @@ class User extends Authenticatable
         return $this->hasMany(Submission::class);
     }
 
+    /** Users sign in only through Discord; there is no password. */
+    public function getAuthPassword(): string
+    {
+        return '';
+    }
+
     public function isAdmin(): bool
     {
         return $this->is_admin && $this->is_member;
