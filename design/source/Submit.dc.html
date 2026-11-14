@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Genetic Mastery – new claim</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+body{margin:0;background:#0E1214}
+a{color:#7EE3BC}a:hover{color:#A9F0D3}
+</style>
+</helmet>
+<div style="background-color: #0E1214; color: #E8EEF0; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<header style="border-bottom: 1px solid #222B30">
+<div style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E8EEF0">
+<svg width="30" height="30" viewBox="0 0 28 28" fill="none" stroke="#45D19E" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3C8 9 20 9 20 14C20 19 8 19 8 25"></path><path d="M20 3C20 9 8 9 8 14C8 19 20 19 20 25"></path><path d="M10 14H18"></path><path d="M10.5 4.5H17.5"></path><path d="M10.5 23.5H17.5"></path></svg>
+<span style="display: flex; flex-direction: column; line-height: 1.15">
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.08em">GENETIC MASTERY</span>
+<span style="font-size: 12px; color: #9AA8AE">[CLUSTER NAME] · ARK cluster</span>
+</span>
+</a>
+<nav aria-label="Main" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<a href="Main.dc.html" style="padding: 10px 14px; border-radius: 8px; color: #A4B1B6; text-decoration: none; font-weight: 500">Milestones</a>
+<a href="Dashboard.dc.html" style="padding: 10px 14px; border-radius: 8px; color: #A4B1B6; text-decoration: none; font-weight: 500">My dashboard</a>
+<a href="Main.dc.html#leaderboard" style="padding: 10px 14px; border-radius: 8px; color: #A4B1B6; text-decoration: none; font-weight: 500">Leaderboard</a>
+<span style="display: flex; align-items: center; gap: 10px; padding-left: 12px; margin-left: 8px; border-left: 1px solid #263036">
+<span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 999px; background: #263036; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px">J</span>
+<span style="font-weight: 500">Joe</span>
+</span>
+</nav>
+</div>
+</header>
+
+<main style="max-width: 1040px; margin: 0 auto; padding: 32px 24px 72px; display: flex; flex-direction: column; gap: 28px">
+
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #7F8E94; display: flex; gap: 8px"><a href="Dashboard.dc.html">My dashboard</a><span aria-hidden="true">/</span><span>New claim</span></nav>
+
+<sc-if value="{{submitted}}" hint-placeholder-val="{{ false }}">
+<section aria-live="polite" style="background: #151B1E; border: 1px solid rgba(69, 209, 158, 0.5); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<span style="display: inline-flex; align-self: flex-start; padding: 4px 10px; border-radius: 999px; border: 1px dashed rgba(242, 178, 76, 0.8); color: #F5C77A; font-size: 12px; font-weight: 600; letter-spacing: 0.04em">PENDING REVIEW</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 28px; font-weight: 600">Claim S-000144 submitted</h1>
+<p style="margin: 0; color: #A4B1B6; max-width: 640px">{{dinoName}} → {{statName}} is now waiting for an admin. It counts toward the cluster progress only after it is verified. You will see the decision on your dashboard.</p>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px">
+<a href="Dashboard.dc.html" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 18px; border-radius: 10px; background: #45D19E; color: #062A1D; text-decoration: none; font-weight: 600">Back to dashboard</a>
+<button type="button" onClick="{{reset}}" style="min-height: 46px; padding: 0 18px; border-radius: 10px; border: 1px solid #33404A; background: transparent; color: #E8EEF0; font: inherit; font-weight: 500; cursor: pointer">Send another claim</button>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{editing}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 30px; font-weight: 600">New claim</h1>
+<p style="margin: 0; color: #A4B1B6">Pick the milestone, add your screenshots and send it. An admin checks every claim before it counts.</p>
+</div>
+
+<section aria-labelledby="step-species" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="step-species" style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600"><span style="width: 26px; height: 26px; border-radius: 999px; background: #1B2327; border: 1px solid #33404A; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px">1</span>Species</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 10px">
+<sc-for list="{{dinos}}" as="d" hint-placeholder-count="9">
+<button type="button" onClick="{{d.pick}}" aria-pressed="{{d.pressed}}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px; padding: 10px 14px; border-radius: 12px; border: {{d.border}}; background: {{d.bg}}; color: #E8EEF0; font: inherit; text-align: left; cursor: pointer">
+<span style="font-weight: 600">{{d.name}}</span>
+<span style="font-size: 13px; color: #9AA8AE">{{d.done}} / 6 verified</span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="step-stat" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="step-stat" style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600"><span style="width: 26px; height: 26px; border-radius: 999px; background: #1B2327; border: 1px solid #33404A; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px">2</span>Stat</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 10px">
+<sc-for list="{{statOpts}}" as="s" hint-placeholder-count="6">
+<button type="button" onClick="{{s.pick}}" disabled="{{s.disabled}}" aria-pressed="{{s.pressed}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; padding: 10px 14px; border-radius: 12px; border: {{s.border}}; background: {{s.bg}}; color: {{s.color}}; font: inherit; text-align: left; cursor: {{s.cursor}}">
+<span style="font-weight: 600">{{s.name}}</span>
+<span style="font-size: 13px; color: {{s.noteColor}}">{{s.note}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 14px 16px; border-radius: 12px; background: #151B1E; border: 1px solid #263036">
+<span style="font-size: 13px; color: #9AA8AE">You are claiming</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; font-weight: 600; color: #7EE3BC">{{code}}</span>
+<span style="font-size: 14px">{{dinoName}} → {{statName}} · required value 250</span>
+</div>
+</section>
+
+<section aria-labelledby="step-shots" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="step-shots" style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600"><span style="width: 26px; height: 26px; border-radius: 999px; background: #1B2327; border: 1px solid #33404A; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px">3</span>Screenshots</h2>
+<label for="files" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 140px; padding: 20px; border-radius: 14px; border: 1.5px dashed #3A4952; background: #12171A; text-align: center; cursor: pointer">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7EE3BC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"></path><path d="M7 9L12 4L17 9"></path><path d="M4 16V19A1 1 0 0 0 5 20H19A1 1 0 0 0 20 19V16"></path></svg>
+<span style="font-weight: 600">Drop screenshots here or <span style="color: #7EE3BC; text-decoration: underline">browse</span></span>
+<span style="font-size: 13px; color: #9AA8AE">PNG, JPG or WEBP · up to 10 files · 15 MB each · stats screen and ancestry are expected</span>
+<input id="files" type="file" multiple accept="image/png,image/jpeg,image/webp" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+</label>
+<ul aria-label="Selected screenshots" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{files}}" as="f" hint-placeholder-count="2">
+<li style="display: grid; grid-template-columns: 112px minmax(0, 1fr) 230px 44px; align-items: center; gap: 16px; padding: 10px; border-radius: 12px; background: #151B1E; border: 1px solid #263036">
+<div role="img" aria-label="Preview of {{f.name}}" style="height: 64px; border-radius: 8px; background-color: #1B2327; background-image: repeating-linear-gradient(135deg, rgba(126, 227, 188, 0.10) 0px, rgba(126, 227, 188, 0.10) 6px, rgba(0, 0, 0, 0) 6px, rgba(0, 0, 0, 0) 14px); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #9AA8AE">preview</div>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.name}}</span>
+<span style="font-size: 13px; color: #7F8E94">{{f.size}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="{{f.selId}}" style="font-size: 12px; color: #9AA8AE">Screenshot type</label>
+<select id="{{f.selId}}" style="min-height: 40px; padding: 0 10px; border-radius: 8px; border: 1px solid #33404A; background: #0E1214; color: #E8EEF0; font: inherit; font-size: 14px">
+<sc-for list="{{f.options}}" as="o" hint-placeholder-count="3"><option>{{o}}</option></sc-for>
+</select>
+</div>
+<button type="button" aria-label="Remove {{f.name}}" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #33404A; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A4B1B6" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4L12 12M12 4L4 12"></path></svg>
+</button>
+</li>
+</sc-for>
+</ul>
+</section>
+
+<section aria-labelledby="step-note" style="display: flex; flex-direction: column; gap: 10px">
+<h2 id="step-note" style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600"><span style="width: 26px; height: 26px; border-radius: 999px; background: #1B2327; border: 1px solid #33404A; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px">4</span><label for="note">Note for the admin <span style="font-weight: 400; color: #9AA8AE">(optional)</span></label></h2>
+<textarea id="note" rows="4" maxlength="1000" placeholder="Server, tribe, anything that helps the admin check it" style="padding: 12px 14px; border-radius: 12px; border: 1px solid #33404A; background: #12171A; color: #E8EEF0; font: inherit; resize: vertical"></textarea>
+<span style="align-self: flex-end; font-size: 12px; color: #7F8E94">0 / 1000</span>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; border-top: 1px solid #222B30">
+<span style="font-size: 14px; color: #A4B1B6; max-width: 560px">After sending, the claim gets its own ID and stays pending until an admin decides. You cannot edit it, but you can withdraw it.</span>
+<div style="display: flex; gap: 12px; align-items: center">
+<a href="Dashboard.dc.html" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 16px; color: #A4B1B6; text-decoration: none; font-weight: 500">Cancel</a>
+<button type="button" onClick="{{submit}}" style="min-height: 48px; padding: 0 24px; border-radius: 10px; border: 0; background: #45D19E; color: #062A1D; font: inherit; font-weight: 600; cursor: pointer">Submit claim</button>
+</div>
+</div>
+
+</div>
+</sc-if>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { dino: 3, stat: 1, submitted: false };
+  }
+  firstOpen(grid, d) {
+    var cells = grid[d][2];
+    for (var i = 0; i < cells.length; i++) {
+      var k = cells[i].split(':')[0];
+      if (k === 'L' || k === 'P' || k === 'RM') { return i; }
+    }
+    return -1;
+  }
+  renderVals() {
+    var self = this;
+    var stats = ['Health', 'Stamina', 'Oxygen', 'Food', 'Weight', 'Melee Damage'];
+    var statCodes = ['HEALTH', 'STAMINA', 'OXYGEN', 'FOOD', 'WEIGHT', 'MELEE'];
+    var grid = [
+      ['Rex', 'REX', ['M', 'V:Kira', 'L', 'M', 'V:Marek', 'PM']],
+      ['Raptor', 'RAPTOR', ['V:Eva', 'V:Eva', 'V:Ondra', 'L', 'V:Kira', 'M']],
+      ['Carnotaurus', 'CARNO', ['V:Marek', 'L', 'L', 'V:Kira', 'V:Marek', 'L']],
+      ['Giganotosaurus', 'GIGA', ['V:Ondra', 'L', 'L', 'L', 'V:Kira', 'M']],
+      ['Therizinosaurus', 'THERI', ['V:Eva', 'V:Ondra', 'L', 'RM', 'P', 'L']],
+      ['Spinosaurus', 'SPINO', ['L', 'V:Marek', 'L', 'V:Eva', 'L', 'L']],
+      ['Allosaurus', 'ALLO', ['V:Kira', 'L', 'P', 'L', 'M', 'L']],
+      ['Yutyrannus', 'YUTY', ['L', 'L', 'L', 'V:Ondra', 'L', 'P']],
+      ['Megalosaurus', 'MEGALO', ['L', 'V:Eva', 'L', 'L', 'L', 'L']]
+    ];
+    var st = this.state;
+    var dinos = grid.map(function (g, i) {
+      var sel = i === st.dino;
+      var done = g[2].filter(function (c) { var k = c.split(':')[0]; return k === 'V' || k === 'M'; }).length;
+      return {
+        name: g[0], done: done, pressed: sel ? 'true' : 'false',
+        border: sel ? '2px solid #45D19E' : '1px solid #263036',
+        bg: sel ? 'rgba(69, 209, 158, 0.12)' : '#151B1E',
+        pick: function () { self.setState({ dino: i, stat: self.firstOpen(grid, i) }); }
+      };
+    });
+    var cur = grid[st.dino];
+    var statOpts = cur[2].map(function (code, i) {
+      var parts = code.split(':');
+      var k = parts[0];
+      var who = parts[1] || '';
+      var open = k === 'L' || k === 'P' || k === 'RM';
+      var sel = open && i === st.stat;
+      var note = k === 'L' ? 'Open' : k === 'P' ? 'In review, you can still claim' : k === 'RM' ? 'Your last claim was rejected' : k === 'PM' ? 'Your claim is in review' : k === 'M' ? 'Verified · your discovery' : 'Verified · ' + who;
+      return {
+        name: stats[i], note: note, disabled: !open, pressed: sel ? 'true' : 'false',
+        border: sel ? '2px solid #45D19E' : open ? '1px solid #33404A' : '1px solid #1F282C',
+        bg: sel ? 'rgba(69, 209, 158, 0.12)' : open ? '#151B1E' : '#101416',
+        color: open ? '#E8EEF0' : '#7F8E94',
+        noteColor: k === 'P' ? '#F5C77A' : k === 'RM' ? '#F6B1A8' : open ? '#9AA8AE' : '#7F8E94',
+        cursor: open ? 'pointer' : 'not-allowed',
+        pick: function () { if (open) { self.setState({ stat: i }); } }
+      };
+    });
+    var statIdx = st.stat;
+    var dinoName = cur[0];
+    var statName = statIdx >= 0 ? stats[statIdx] : 'no open stat';
+    var code = statIdx >= 0 ? cur[1] + '_' + statCodes[statIdx] + '_250' : 'All stats are taken';
+    return {
+      dinos: dinos,
+      statOpts: statOpts,
+      dinoName: dinoName,
+      statName: statName,
+      code: code,
+      submitted: st.submitted,
+      editing: !st.submitted,
+      files: [
+        { name: 'stats-screen.png', size: '2.4 MB · 2560 × 1440', selId: 'type-1', options: ['Stats', 'Ancestry & mutations', 'Other'] },
+        { name: 'ancestry-mutations.png', size: '1.9 MB · 2560 × 1440', selId: 'type-2', options: ['Ancestry & mutations', 'Stats', 'Other'] }
+      ],
+      submit: function () { self.setState({ submitted: true }); },
+      reset: function () { self.setState({ submitted: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

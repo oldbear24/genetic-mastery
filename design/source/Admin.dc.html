@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Genetic Mastery – admin review queue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+body{margin:0;background:#0E1214}
+a{color:#7EE3BC}a:hover{color:#A9F0D3}
+</style>
+</helmet>
+<div style="background-color: #0E1214; color: #E8EEF0; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<header style="border-bottom: 1px solid #222B30">
+<div style="max-width: 1320px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E8EEF0">
+<svg width="30" height="30" viewBox="0 0 28 28" fill="none" stroke="#45D19E" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3C8 9 20 9 20 14C20 19 8 19 8 25"></path><path d="M20 3C20 9 8 9 8 14C8 19 20 19 20 25"></path><path d="M10 14H18"></path><path d="M10.5 4.5H17.5"></path><path d="M10.5 23.5H17.5"></path></svg>
+<span style="display: flex; flex-direction: column; line-height: 1.15">
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.08em">GENETIC MASTERY</span>
+<span style="font-size: 12px; color: #F5C77A; font-weight: 600; letter-spacing: 0.06em">ADMIN</span>
+</span>
+</a>
+<nav aria-label="Admin" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<a href="Admin.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; color: #E8EEF0; text-decoration: none; background: #1B2327; font-weight: 500">Review queue <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; padding: 1px 7px; border-radius: 999px; background: #F2B24C; color: #241703; font-weight: 600">{{pendingCount}}</span></a>
+<a href="Admin.dc.html" style="padding: 10px 14px; border-radius: 8px; color: #A4B1B6; text-decoration: none; font-weight: 500">All submissions</a>
+<a href="Admin.dc.html" style="padding: 10px 14px; border-radius: 8px; color: #A4B1B6; text-decoration: none; font-weight: 500">Audit log</a>
+<span style="display: flex; align-items: center; gap: 10px; padding-left: 12px; margin-left: 8px; border-left: 1px solid #263036">
+<span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 999px; background: #263036; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px">K</span>
+<span style="font-weight: 500">Kuba</span>
+</span>
+</nav>
+</div>
+</header>
+
+<main style="max-width: 1320px; margin: 0 auto; padding: 28px 24px 72px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px">
+
+<section aria-labelledby="queue-title" style="flex: 1 1 320px; min-width: 0; background: #151B1E; border: 1px solid #263036; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 0 4px">
+<h1 id="queue-title" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 20px; font-weight: 600">Pending claims</h1>
+<span style="font-size: 13px; color: #9AA8AE">Oldest first · filter by species, stat or player</span>
+</div>
+<label for="queue-filter" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filter claims</label>
+<input id="queue-filter" type="search" placeholder="Filter: species, stat, player" style="min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid #33404A; background: #0E1214; color: #E8EEF0; font: inherit; font-size: 14px">
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="5">
+<li>
+<button type="button" onClick="{{q.pick}}" aria-pressed="{{q.pressed}}" style="width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; border: {{q.border}}; background: {{q.bg}}; color: #E8EEF0; font: inherit; text-align: left; cursor: pointer">
+<span style="display: flex; justify-content: space-between; gap: 8px; width: 100%">
+<span style="font-weight: 600">{{q.dino}} · {{q.stat}}</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9AA8AE">{{q.id}}</span>
+</span>
+<span style="font-size: 13px; color: #A4B1B6">{{q.player}} · {{q.when}} · {{q.images}} images</span>
+<sc-if value="{{q.parallel}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #F5C77A">2 claims for this milestone</span></sc-if>
+<sc-if value="{{q.doneLabel}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: {{q.doneColor}}">{{q.doneLabel}}</span></sc-if>
+</button>
+</li>
+</sc-for>
+</ol>
+</section>
+
+<section aria-labelledby="detail-title" style="flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+
+<div style="background: #151B1E; border: 1px solid #263036; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #7EE3BC">{{cur.code}} · required 250</span>
+<h2 id="detail-title" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 28px; font-weight: 600">{{cur.dino}} · {{cur.stat}}</h2>
+<span style="font-size: 14px; color: #9AA8AE">Claim {{cur.id}} · submitted {{cur.when}}</span>
+</div>
+<span style="padding: 4px 10px; border-radius: 999px; border: 1px dashed rgba(242, 178, 76, 0.8); color: #F5C77A; font-size: 12px; font-weight: 600; letter-spacing: 0.04em">PENDING REVIEW</span>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: #12171A; border: 1px solid #222B30">
+<span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 999px; background: #263036; display: flex; align-items: center; justify-content: center; font-weight: 600">{{cur.initial}}</span>
+<div style="display: flex; flex-direction: column; gap: 2px; flex: 1 1 200px">
+<span style="font-weight: 600">{{cur.player}}</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9AA8AE">Discord ID {{cur.discordId}}</span>
+</div>
+<span style="font-size: 13px; color: #A4B1B6">{{cur.history}}</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #9AA8AE">PLAYER NOTE</span>
+<p style="margin: 0; padding: 12px 14px; border-radius: 10px; background: #12171A; border: 1px solid #222B30">{{cur.note}}</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #9AA8AE">EVIDENCE</span>
+<span style="font-size: 13px; color: #9AA8AE">Click an image to zoom · originals download as files</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px">
+<sc-for list="{{cur.shots}}" as="s" hint-placeholder-count="3">
+<figure style="margin: 0; display: flex; flex-direction: column; gap: 6px">
+<button type="button" aria-label="Open {{s.label}} full size" style="height: 150px; border-radius: 10px; border: 1px solid #263036; background-color: #1B2327; background-image: repeating-linear-gradient(135deg, rgba(126, 227, 188, 0.10) 0px, rgba(126, 227, 188, 0.10) 6px, rgba(0, 0, 0, 0) 6px, rgba(0, 0, 0, 0) 14px); color: #9AA8AE; font: inherit; font-size: 12px; cursor: zoom-in">screenshot</button>
+<figcaption style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="font-weight: 500">{{s.label}}</span><a href="Admin.dc.html">Original</a></figcaption>
+</figure>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #9AA8AE">CHECKS</span>
+<sc-for list="{{cur.checks}}" as="c" hint-placeholder-count="2">
+<div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 10px; border: {{c.border}}; background: {{c.bg}}">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: {{c.color}}; padding-top: 2px; white-space: nowrap">{{c.tag}}</span>
+<span style="font-size: 14px">{{c.text}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{showDecision}}" hint-placeholder-val="{{ true }}">
+<div style="background: #151B1E; border: 1px solid #263036; border-radius: 16px; padding: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 16px; font-weight: 600">Approve</h3>
+<label for="pub-note" style="font-size: 13px; color: #9AA8AE">Public note (optional, shown in history)</label>
+<input id="pub-note" type="text" placeholder="e.g. Checked against the mutation log" style="min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #33404A; background: #0E1214; color: #E8EEF0; font: inherit; font-size: 14px">
+<span style="font-size: 13px; color: #A4B1B6">{{cur.approveEffect}}</span>
+<button type="button" onClick="{{approve}}" style="min-height: 48px; border-radius: 10px; border: 0; background: #45D19E; color: #062A1D; font: inherit; font-weight: 600; cursor: pointer">{{cur.approveLabel}}</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 16px; font-weight: 600">Reject</h3>
+<label for="reason" style="font-size: 13px; color: #9AA8AE">Reason (required, the player sees it)</label>
+<textarea id="reason" rows="3" placeholder="What is missing or wrong?" style="padding: 10px 12px; border-radius: 10px; border: 1px solid #33404A; background: #0E1214; color: #E8EEF0; font: inherit; font-size: 14px; resize: vertical"></textarea>
+<button type="button" onClick="{{reject}}" style="min-height: 48px; border-radius: 10px; border: 1px solid rgba(240, 138, 126, 0.7); background: transparent; color: #F6B1A8; font: inherit; font-weight: 600; cursor: pointer">Reject claim</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showResult}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="background: #151B1E; border: {{resultBorder}}; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: {{resultColor}}">{{resultTitle}}</h3>
+<p style="margin: 0; color: #A4B1B6">{{resultText}}</p>
+<button type="button" onClick="{{undo}}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; margin-top: 6px; border-radius: 8px; border: 1px solid #33404A; background: transparent; color: #E8EEF0; font: inherit; font-size: 14px; cursor: pointer">Undo in prototype</button>
+</div>
+</sc-if>
+
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1340}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 3, decided: {} };
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var items = [
+      { id: 'S-000131', dino: 'Allosaurus', stat: 'Oxygen', code: 'ALLO_OXYGEN_250', player: 'Ondra', initial: 'O', discordId: '398201554761203712', history: '4 verified · 0 rejected', when: '13 Nov 2026, 09:12', images: 3, parallel: false, note: 'Line from the Fjordur cluster tames, ancestry attached.', shots: ['Stats', 'Ancestry & mutations', 'Other'], laterOf: '', dup: '' },
+      { id: 'S-000135', dino: 'Yutyrannus', stat: 'Melee Damage', code: 'YUTY_MELEE_250', player: 'Eva', initial: 'E', discordId: '512877340018204160', history: '5 verified · 1 rejected', when: '13 Nov 2026, 18:40', images: 2, parallel: false, note: 'Third generation after the last mutation.', shots: ['Stats', 'Ancestry & mutations'], laterOf: '', dup: '' },
+      { id: 'S-000139', dino: 'Therizinosaurus', stat: 'Weight', code: 'THERI_WEIGHT_250', player: 'Marek', initial: 'M', discordId: '275660129304887296', history: '4 verified · 0 rejected', when: '13 Nov 2026, 22:05', images: 2, parallel: false, note: 'No note.', shots: ['Stats', 'Ancestry & mutations'], laterOf: '', dup: '' },
+      { id: 'S-000141', dino: 'Rex', stat: 'Melee Damage', code: 'REX_MELEE_250', player: 'Kira', initial: 'K', discordId: '184772930117345280', history: '5 verified · 0 rejected', when: '14 Nov 2026, 10:02', images: 3, parallel: true, note: '252 points in melee after the last mutation, bred on The Island.', shots: ['Stats', 'Ancestry & mutations', 'Other'], laterOf: '', dup: '', other: 'S-000143 by Joe, submitted later (14 Nov, 14:20)' },
+      { id: 'S-000143', dino: 'Rex', stat: 'Melee Damage', code: 'REX_MELEE_250', player: 'Joe', initial: 'J', discordId: '330915472668606464', history: '5 verified · 1 rejected', when: '14 Nov 2026, 14:20', images: 2, parallel: true, note: 'Same line as my Giga breeding pair.', shots: ['Stats', 'Ancestry & mutations'], laterOf: 'S-000141 by Kira, submitted earlier (14 Nov, 10:02)', dup: 'ancestry-mutations.png has the same SHA-256 as an image in S-000141.' }
+    ];
+    var decided = st.decided;
+    var pendingCount = items.filter(function (it) { return !decided[it.id]; }).length;
+    var queue = items.map(function (it, i) {
+      var sel = i === st.sel;
+      var d = decided[it.id];
+      return {
+        id: it.id, dino: it.dino, stat: it.stat, player: it.player, when: it.when.replace(' 2026', ''), images: it.images,
+        parallel: it.parallel && !d, pressed: sel ? 'true' : 'false',
+        doneLabel: d === 'approved' ? 'Approved' : d === 'rejected' ? 'Rejected' : d === 'superseded' ? 'Closed as superseded' : '',
+        doneColor: d === 'approved' ? '#7EE3BC' : d === 'rejected' ? '#F6B1A8' : '#9AA8AE',
+        border: sel ? '2px solid #45D19E' : '1px solid #263036',
+        bg: sel ? 'rgba(69, 209, 158, 0.10)' : '#12171A',
+        pick: function () { self.setState({ sel: i }); }
+      };
+    });
+    var it = items[st.sel];
+    var checks = [];
+    if (it.other) { checks.push({ tag: 'PARALLEL', text: 'Another pending claim for this milestone: ' + it.other + '.', color: '#F5C77A', border: '1px dashed rgba(242, 178, 76, 0.7)', bg: 'rgba(242, 178, 76, 0.06)' }); }
+    if (it.laterOf) { checks.push({ tag: 'LATER CLAIM', text: 'An earlier claim exists: ' + it.laterOf + '. Approving this one asks for confirmation.', color: '#F5C77A', border: '1px dashed rgba(242, 178, 76, 0.7)', bg: 'rgba(242, 178, 76, 0.06)' }); }
+    if (it.dup) { checks.push({ tag: 'DUPLICATE', text: it.dup, color: '#F6B1A8', border: '1px solid rgba(240, 138, 126, 0.6)', bg: 'rgba(240, 138, 126, 0.06)' }); }
+    if (!it.dup) { checks.push({ tag: 'OK', text: 'No duplicate images found in other claims.', color: '#7EE3BC', border: '1px solid #263036', bg: '#12171A' }); }
+    var d = decided[it.id];
+    var cur = {
+      id: it.id, dino: it.dino, stat: it.stat, code: it.code, player: it.player, initial: it.initial,
+      discordId: it.discordId, history: it.history, when: it.when, note: it.note,
+      shots: it.shots.map(function (s) { return { label: s }; }),
+      checks: checks,
+      approveLabel: it.laterOf ? 'Approve anyway' : 'Approve claim',
+      approveEffect: it.parallel ? 'Verifies the milestone, closes the other claim as superseded and posts to Discord.' : 'Verifies the milestone and posts to Discord.'
+    };
+    var approve = function () {
+      var next = Object.assign({}, decided);
+      next[it.id] = 'approved';
+      items.forEach(function (o) { if (o.code === it.code && o.id !== it.id && !next[o.id]) { next[o.id] = 'superseded'; } });
+      self.setState({ decided: next });
+    };
+    var reject = function () {
+      var next = Object.assign({}, decided);
+      next[it.id] = 'rejected';
+      self.setState({ decided: next });
+    };
+    var undo = function () { self.setState({ decided: {} }); };
+    var approvedCount = Object.keys(decided).filter(function (k) { return decided[k] === 'approved'; }).length;
+    var prog = 23 + approvedCount;
+    var indoNow = 150 + 25 * prog;
+    var resultTitle = d === 'approved' ? 'Approved · ' + it.code + ' is verified' : d === 'rejected' ? 'Rejected' : d === 'superseded' ? 'Closed as superseded' : '';
+    var resultText = d === 'approved' ? 'Cluster progress is now ' + prog + ' / 54 and Indo Potential ' + indoNow + ' / 1500. Discovered by ' + it.player + '. The Discord announcement is queued.' : d === 'rejected' ? it.player + ' sees your reason on the dashboard and can send a new claim.' : d === 'superseded' ? 'Another claim for this milestone was approved. Revoking that verification would reopen this one.' : '';
+    return {
+      queue: queue,
+      pendingCount: pendingCount,
+      cur: cur,
+      showDecision: !d,
+      showResult: !!d,
+      resultTitle: resultTitle,
+      resultText: resultText,
+      resultColor: d === 'approved' ? '#7EE3BC' : d === 'rejected' ? '#F6B1A8' : '#E8EEF0',
+      resultBorder: d === 'approved' ? '1px solid rgba(69, 209, 158, 0.6)' : d === 'rejected' ? '1px solid rgba(240, 138, 126, 0.6)' : '1px solid #263036',
+      approve: approve,
+      reject: reject,
+      undo: undo
+    };
+  }
+}
+</script>
+</body>
+</html>
