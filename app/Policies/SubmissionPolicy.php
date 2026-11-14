@@ -26,6 +26,16 @@ class SubmissionPolicy
         return $user->id === $submission->user_id && $submission->status === SubmissionStatus::Pending;
     }
 
+    /**
+     * Approve or reject. Admins may not decide their own claims unless
+     * ALLOW_SELF_APPROVE is on (ADM-7).
+     */
+    public function decide(User $user, Submission $submission): bool
+    {
+        return $user->isAdmin()
+            && ($submission->user_id !== $user->id || (bool) config('genetic.allow_self_approve'));
+    }
+
     /** Originals are for admins only (UPL-5, OPR-6). */
     public function downloadOriginal(User $user, Submission $submission): bool
     {

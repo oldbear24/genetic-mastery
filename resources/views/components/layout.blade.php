@@ -40,8 +40,12 @@
                         <span class="rounded-full bg-wait px-[7px] py-px font-mono text-xs font-semibold text-wait-on" aria-label="{{ trans_choice('app.nav.pending_count', $pendingCount) }}">{{ $pendingCount }}</span>
                     @endif
                 </a>
-                <a href="{{ route('admin.submissions') }}" class="nav-link" @if ($current === 'submissions') aria-current="page" @endif>{{ __('app.nav.all_submissions') }}</a>
-                <a href="{{ route('admin.audit') }}" class="nav-link" @if ($current === 'audit') aria-current="page" @endif>{{ __('app.nav.audit_log') }}</a>
+                @if (Route::has('admin.submissions'))
+                    <a href="{{ route('admin.submissions') }}" class="nav-link" @if ($current === 'submissions') aria-current="page" @endif>{{ __('app.nav.all_submissions') }}</a>
+                @endif
+                @if (Route::has('admin.audit'))
+                    <a href="{{ route('admin.audit') }}" class="nav-link" @if ($current === 'audit') aria-current="page" @endif>{{ __('app.nav.audit_log') }}</a>
+                @endif
                 <a href="{{ route('home') }}" class="nav-link">{{ __('app.nav.milestones') }}</a>
             @else
                 <a href="{{ route('home') }}" class="nav-link" @if ($current === 'milestones') aria-current="page" @endif>{{ __('app.nav.milestones') }}</a>

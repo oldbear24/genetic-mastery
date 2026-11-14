@@ -9,7 +9,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | 1. Kostra | hotovo |
 | 2. Přihlášení a hlavní stránka | hotovo |
 | 3. Submission a upload | hotovo |
-| 4. Admin rozhodování | čeká |
+| 4. Admin rozhodování | hotovo |
 | 5. Opravy a historie | čeká |
 | 6. Discord | čeká |
 | 7. Zabezpečení a provoz | čeká |
@@ -112,3 +112,29 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 **Chybí nebo zůstává otevřené**
 
 - Vizuální kontrola formuláře a přehledu v prohlížeči neproběhla (rozšíření prohlížeče se během etapy odpojilo). Stránky jsou ověřené testy a HTTP smoke testem včetně odeslání skutečných souborů.
+
+## Etapa 4: Admin rozhodování
+
+**Hotovo**
+
+- Tabulky `audit_log` (jen přidávání: model odmítne update i delete, navíc triggery v SQLite i PostgreSQL), `submission_notes` (veřejné a interní poznámky) a `discord_outbox` (fronta zpráv, odesílání přijde v etapě 6).
+- `ReviewService::approve` jako jedna transakce: zámek řádku milníku a žádosti, kontrola stavu, VERIFIED se jménem admina a časem, ostatní čekající žádosti SUPERSEDED s `superseded_by_id`, audit každé změny, volitelná veřejná poznámka a zpráva do `discord_outbox`. Porušení unikátního indexu se převede na srozumitelnou chybu.
+- `ReviewService::reject` s povinným důvodem (ADM-6) a auditem.
+- ADM-3: kontrola souběžných žádostí s pořadím, pozdější žádost jde schválit jen se zaškrtnutým potvrzením.
+- ADM-4: upozornění na stejný SHA-256 v jiné žádosti s odkazem na ni.
+- ADM-7: politika `decide` zakáže rozhodnout o vlastní žádosti, pokud `ALLOW_SELF_APPROVE=false`. Platí na serveru (403) i v UI.
+- Admin obrazovka podle návrhu `/admin`: fronta nejstarší nahoře s filtrem (každé slovo musí sedět na druh, stat, hráče nebo ID), detail s hráčem, Discord ID, historií hráče, poznámkou, důkazy s lupou a odkazy na originály, kontrolami a formuláři Schválit a Zamítnout. Po rozhodnutí se vrátí do fronty se shrnutím (nový progres a Indo Potential).
+- Admin routy chrání `can:admin`, takže hráč dostane 403 a po odebrání role na Discordu do 10 minut také.
+- Testy (118), mimo jiné akceptační kritéria: dva admini současně (dva skutečné PHP procesy nad souborovou SQLite, právě jeden VERIFIED, druhý dostane chybu, progres +1), zákaz vlastní žádosti při `ALLOW_SELF_APPROVE=false`, 403 na admin adresách, schválení bez jediného volání Discordu, audit nejde změnit ani smazat. Souběžný test při přepnutí na `DEFERRED` transakce spadne na „database is locked“, takže opravdu hlídá `BEGIN IMMEDIATE`.
+
+**Rozhodnutí**
+
+- Payload v `discord_outbox` nese čísla v okamžiku schválení (V, Indo Potential). Text zprávy se sestaví až při odeslání, aby šel změnit bez úprav uložených řádků.
+- Potvrzení pozdější žádosti je zaškrtávací pole nad tlačítkem „Schválit i tak“. Kontrola platí i na serveru.
+- Filtr fronty je jedno vyhledávací pole jako v návrhu. Hledá v názvech i kódech druhů a statů, ve jméně hráče (aktuálním i z doby odeslání) a v ID žádosti.
+- Souběžný test běží jen na SQLite (potřebuje souborovou databázi mimo transakci testu). Na PostgreSQL stejný případ pokrývá test, který simuluje stav po cizím commitu, a zámek `SELECT … FOR UPDATE`.
+- Triggery pro audit log jsou jediné SQL specifické pro databázi a jsou v migraci rozdělené podle driveru. PostgreSQL varianta se ověří až v CI.
+
+**Chybí nebo zůstává otevřené**
+
+- Seznam všech žádostí, stránka historie změn, zrušení ověření, znovuotevření, změna admina a přidání poznámky (etapa 5). Odkazy „Všechny žádosti“ a „Historie změn“ se v hlavičce zatím nezobrazují.

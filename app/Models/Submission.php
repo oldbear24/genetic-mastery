@@ -102,6 +102,11 @@ class Submission extends Model
         return $this->hasMany(SubmissionImage::class)->orderBy('position');
     }
 
+    public function notes(): HasMany
+    {
+        return $this->hasMany(SubmissionNote::class)->orderBy('created_at')->orderBy('id');
+    }
+
     public function supersededBy(): BelongsTo
     {
         return $this->belongsTo(Submission::class, 'superseded_by_id');

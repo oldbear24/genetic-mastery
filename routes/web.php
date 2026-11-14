@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Auth\DiscordLoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvidenceController;
@@ -43,6 +44,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/submissions/new', [SubmissionController::class, 'create'])->name('submissions.create');
     Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
     Route::post('/submissions/{submission:public_id}/withdraw', [SubmissionController::class, 'withdraw'])->name('submissions.withdraw');
+});
+
+// Admins (SEC-2: every action is checked on the server, non-admins get 403)
+Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [ReviewController::class, 'queue'])->name('queue');
+    Route::get('/submissions/{submission:public_id}', [ReviewController::class, 'show'])->name('submissions.show');
+    Route::post('/submissions/{submission:public_id}/approve', [ReviewController::class, 'approve'])->name('submissions.approve');
+    Route::post('/submissions/{submission:public_id}/reject', [ReviewController::class, 'reject'])->name('submissions.reject');
 });
 
 // Local development only: signed login links from `php artisan dev:login`.
