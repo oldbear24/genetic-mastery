@@ -64,9 +64,20 @@ return [
         'rejected' => 'Zamítnuto · :id. Hráč :name uvidí důvod ve svém přehledu a může poslat novou žádost.',
     ],
 
+    'list' => [
+        'id' => 'ID',
+        'status' => 'Stav',
+        'milestone' => 'Milník',
+        'player' => 'Hráč',
+        'player_placeholder' => 'Jméno nebo Discord ID',
+        'admin' => 'Admin',
+        'submitted' => 'Odesláno',
+        'empty' => 'Filtru neodpovídá žádná žádost.',
+    ],
+
     'errors' => [
         'not_pending' => 'Žádost :id už nečeká na schválení (:status).',
-        'already_verified' => 'Tento milník už mezitím ověřil jiný admin. Žádost nejde schválit.',
+        'already_verified' => 'Tento milník je mezitím už ověřený jinou žádostí. Tuto žádost nejde schválit.',
         'confirm_later' => 'Na tento milník čeká dřívější žádost. Schválení pozdější žádosti je potřeba potvrdit.',
         'own_claim' => 'O vlastní žádosti nemůžete rozhodnout.',
         'reason_required' => 'Napište důvod zamítnutí. Hráč ho uvidí.',

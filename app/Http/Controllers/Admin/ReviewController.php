@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\SubmissionStatus;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Submission;
 use App\Models\SubmissionImage;
+use App\Models\User;
 use App\Services\ClusterProgress;
 use App\Services\DecisionRefused;
 use App\Services\ReviewService;
@@ -158,6 +160,14 @@ class ReviewController extends Controller
                 'playerVerified' => Submission::query()->verified()->where('user_id', $current->user_id)->count(),
                 'playerRejected' => Submission::query()->where('status', SubmissionStatus::Rejected->value)->where('user_id', $current->user_id)->count(),
                 'canDecide' => $request->user()->can('decide', $current),
+                'admins' => User::query()->where('is_admin', true)->where('is_member', true)->orderBy('display_name')->get(),
+                'trail' => $trail = AuditLog::query()->with('actor')
+                    ->where('entity', 'submissions')->where('entity_id', $current->id)
+                    ->orderBy('created_at')->orderBy('id')->get(),
+                'trailUsers' => User::query()->whereIn('id', $trail->flatMap(fn (AuditLog $e) => [
+                    $e->before['reviewed_by'] ?? null, $e->after['reviewed_by'] ?? null,
+                    $e->before['revoked_by'] ?? null, $e->after['revoked_by'] ?? null,
+                ])->filter()->unique())->get()->keyBy('id'),
             ];
         }
 

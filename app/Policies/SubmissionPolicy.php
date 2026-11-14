@@ -36,6 +36,21 @@ class SubmissionPolicy
             && ($submission->user_id !== $user->id || (bool) config('genetic.allow_self_approve'));
     }
 
+    /**
+     * Revoke, reopen and change the verifier (OPR-2 to OPR-4). Same rule as
+     * deciding: not on one's own claims unless self approval is allowed.
+     */
+    public function correct(User $user, Submission $submission): bool
+    {
+        return $this->decide($user, $submission);
+    }
+
+    /** Notes can be added by any admin (OPR-5). */
+    public function addNote(User $user, Submission $submission): bool
+    {
+        return $user->isAdmin();
+    }
+
     /** Originals are for admins only (UPL-5, OPR-6). */
     public function downloadOriginal(User $user, Submission $submission): bool
     {

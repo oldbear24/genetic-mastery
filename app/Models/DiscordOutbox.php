@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $kind
  * @property int|null $submission_id
  * @property array<string, mixed> $payload
- * @property string $status pending|sending|sent|failed
+ * @property string $status pending|sending|sent|failed|cancelled
  * @property int $attempts
  * @property string|null $last_error
  * @property string|null $message_id
@@ -41,6 +41,9 @@ class DiscordOutbox extends Model
     public const STATUS_SENT = 'sent';
 
     public const STATUS_FAILED = 'failed';
+
+    /** A verified announcement that was revoked before it was sent. */
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected function casts(): array
     {

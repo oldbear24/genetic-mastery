@@ -133,7 +133,11 @@
             </div>
 
             @if ($current->status !== $S::Pending)
-                <div class="card p-6 text-ink-2" role="status">{{ __('admin.detail.not_pending', ['status' => $current->status->label()]) }}</div>
+                <div class="card p-6 text-ink-2" role="status">{{ __('admin.detail.not_pending', ['status' => $current->status->label()]) }}
+                    @if ($current->rejection_reason) <span class="block pt-1 text-bad-text">{{ __('submissions.show.reason', ['reason' => $current->rejection_reason]) }}</span>@endif
+                    @if ($current->revoke_reason) <span class="block pt-1 text-bad-text">{{ __('submissions.show.revoke_reason', ['reason' => $current->revoke_reason]) }}</span>@endif
+                </div>
+                <x-corrections-panel :submission="$current" :admins="$admins" />
             @elseif (! $canDecide)
                 <div class="alert-warning" role="status">{{ __('admin.detail.own_claim') }}</div>
             @else
@@ -170,6 +174,24 @@
                     </form>
                 </div>
             @endif
+
+            @php $trailFormatter = new \App\Support\AuditFormatter($trailUsers); @endphp
+            <section aria-labelledby="trail-title" class="card flex flex-col gap-3 p-6">
+                <h3 id="trail-title" class="m-0 font-display text-xl font-semibold">{{ __('corrections.trail') }}</h3>
+                @if ($trail->isEmpty())
+                    <p class="m-0 text-sm text-ink-3">{{ __('corrections.trail_empty') }}</p>
+                @else
+                    <ol class="m-0 flex list-none flex-col p-0">
+                        @foreach ($trail as $entry)
+                            <li class="flex flex-col gap-1 border-t border-line-soft py-2.5 first:border-t-0">
+                                <span class="font-semibold">{{ $entry->label() }} <span class="font-normal text-ink-3">· {{ $entry->actor?->display_name ?? __('audit.system') }} · <x-time :at="$entry->created_at" /></span></span>
+                                <x-audit-change :entry="$entry" :formatter="$trailFormatter" />
+                                @if ($entry->reason)<span class="text-[13px] text-ink-2">{{ __('audit.reason') }}: {{ $entry->reason }}</span>@endif
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
+            </section>
         @endif
     </section>
 </x-layout>

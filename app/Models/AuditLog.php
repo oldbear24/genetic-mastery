@@ -30,6 +30,18 @@ class AuditLog extends Model
 
     public const UPDATED_AT = null;
 
+    /** Every action the application writes. */
+    public const ACTIONS = [
+        'submission.approved',
+        'submission.rejected',
+        'submission.superseded',
+        'submission.revoked',
+        'submission.reopened',
+        'submission.reopened_after_revoke',
+        'submission.verifier_changed',
+        'note.added',
+    ];
+
     protected static function booted(): void
     {
         static::updating(fn () => throw new LogicException('The audit log is append-only.'));
@@ -52,6 +64,12 @@ class AuditLog extends Model
 
     public function label(): string
     {
-        return __("audit.action.{$this->action}");
+        return self::labelFor($this->action);
+    }
+
+    /** Translation keys cannot contain dots, so "note.added" becomes "note_added". */
+    public static function labelFor(string $action): string
+    {
+        return __('audit.action.'.str_replace('.', '_', $action));
     }
 }

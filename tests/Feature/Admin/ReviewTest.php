@@ -204,7 +204,7 @@ describe('approve', function () {
         $claim = pendingClaim('REX_MELEE_250');
 
         $this->actingAs(admin())->post(route('admin.submissions.approve', $claim))
-            ->assertSessionHas('error', 'Tento milník už mezitím ověřil jiný admin. Žádost nejde schválit.');
+            ->assertSessionHas('error', 'Tento milník je mezitím už ověřený jinou žádostí. Tuto žádost nejde schválit.');
 
         expect(Submission::query()->verified()->count())->toBe(1)
             ->and($claim->fresh()->status)->toBe(SubmissionStatus::Pending)

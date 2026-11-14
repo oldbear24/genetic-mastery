@@ -29,7 +29,7 @@ return [
     'recent' => [
         'title' => 'Poslední objevy',
         'discoverer' => 'Objevitel: :name',
-        'empty' => 'Zatím nikdo nic neobjevil.',
+        'empty' => 'Zatím tu nejsou žádné objevy.',
     ],
 
     'leaders' => [
@@ -68,5 +68,20 @@ return [
         'admin_note' => 'Poznámka admina',
         'history' => 'Historie',
         'new_claim' => 'Nová žádost',
+    ],
+
+    'history' => [
+        'verified' => 'Ověřeno · admin :admin',
+        'announced' => 'oznámeno na Discordu',
+        'submitted' => 'Odeslaná žádost :id · :name',
+    ],
+
+    'earlier' => [
+        'title' => 'Dřívější pokusy',
+        'admins_only' => 'JEN PRO ADMINY',
+        'empty' => 'Žádné další pokusy.',
+        'attempt' => ':id · :name',
+        'reviewed_by' => 'admin :admin',
+        'revoked_by' => 'ověření zrušeno · admin :admin',
     ],
 ];

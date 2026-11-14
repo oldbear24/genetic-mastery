@@ -2,24 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DiscordOutbox;
 use App\Models\Milestone;
+use App\Models\Submission;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MilestoneController extends Controller
 {
     /**
-     * Public milestone detail (HP-3, HIS-1). Shows who has a pending claim
-     * to nobody but admins and the claim authors (HP-4).
+     * Milestone detail. Public: state, discoverer, dates, verifying admin,
+     * evidence and public notes of the verified submission (HIS-1). Admins
+     * also see earlier attempts (HIS-2). Nobody else learns who has a
+     * pending claim (HP-4).
      */
-    public function show(Milestone $milestone): View
+    public function show(Request $request, Milestone $milestone): View
     {
-        $milestone->load(['verifiedSubmission.user', 'verifiedSubmission.reviewer', 'verifiedSubmission.images']);
+        $isAdmin = $request->user()?->isAdmin() ?? false;
+
+        $milestone->load([
+            'verifiedSubmission.user',
+            'verifiedSubmission.reviewer',
+            'verifiedSubmission.images',
+            'verifiedSubmission.notes' => fn ($q) => $isAdmin ? $q->with('author') : $q->where('visibility', 'public')->with('author'),
+        ]);
         $milestone->loadExists(['pendingSubmissions as has_pending']);
+        $verified = $milestone->verifiedSubmission;
+
+        $earlier = $isAdmin
+            ? Submission::query()
+                ->where('milestone_id', $milestone->id)
+                ->when($verified, fn ($q) => $q->whereKeyNot($verified->id))
+                ->with(['user', 'reviewer', 'revoker'])
+                ->orderByDesc('submitted_at')
+                ->orderByDesc('id')
+                ->get()
+            : collect();
 
         return view('milestones.show', [
             'milestone' => $milestone,
             'state' => $milestone->state(),
-            'verified' => $milestone->verifiedSubmission,
+            'verified' => $verified,
+            'announced' => $verified !== null && DiscordOutbox::query()
+                ->where('submission_id', $verified->id)
+                ->where('kind', DiscordOutbox::KIND_VERIFIED)
+                ->where('status', DiscordOutbox::STATUS_SENT)
+                ->exists(),
+            'earlier' => $earlier,
+            'isAdmin' => $isAdmin,
         ]);
     }
 }

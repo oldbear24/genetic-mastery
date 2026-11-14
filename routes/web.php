@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\CorrectionController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\SubmissionListController;
 use App\Http\Controllers\Auth\DiscordLoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvidenceController;
@@ -52,6 +55,13 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group
     Route::get('/submissions/{submission:public_id}', [ReviewController::class, 'show'])->name('submissions.show');
     Route::post('/submissions/{submission:public_id}/approve', [ReviewController::class, 'approve'])->name('submissions.approve');
     Route::post('/submissions/{submission:public_id}/reject', [ReviewController::class, 'reject'])->name('submissions.reject');
+
+    Route::get('/submissions', SubmissionListController::class)->name('submissions');
+    Route::post('/submissions/{submission:public_id}/revoke', [CorrectionController::class, 'revoke'])->name('submissions.revoke');
+    Route::post('/submissions/{submission:public_id}/reopen', [CorrectionController::class, 'reopen'])->name('submissions.reopen');
+    Route::post('/submissions/{submission:public_id}/verifier', [CorrectionController::class, 'changeVerifier'])->name('submissions.verifier');
+    Route::post('/submissions/{submission:public_id}/notes', [CorrectionController::class, 'addNote'])->name('submissions.notes');
+    Route::get('/audit', AuditLogController::class)->name('audit');
 });
 
 // Local development only: signed login links from `php artisan dev:login`.

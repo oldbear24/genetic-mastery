@@ -10,7 +10,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | 2. Přihlášení a hlavní stránka | hotovo |
 | 3. Submission a upload | hotovo |
 | 4. Admin rozhodování | hotovo |
-| 5. Opravy a historie | čeká |
+| 5. Opravy a historie | hotovo |
 | 6. Discord | čeká |
 | 7. Zabezpečení a provoz | čeká |
 
@@ -138,3 +138,31 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 **Chybí nebo zůstává otevřené**
 
 - Seznam všech žádostí, stránka historie změn, zrušení ověření, znovuotevření, změna admina a přidání poznámky (etapa 5). Odkazy „Všechny žádosti“ a „Historie změn“ se v hlavičce zatím nezobrazují.
+
+## Etapa 5: Opravy a historie
+
+**Hotovo**
+
+- `CorrectionService` (každá akce je jedna transakce s auditem):
+  - OPR-2 zrušení ověření: VERIFIED → REVOKED s povinným důvodem, žádosti uzavřené kvůli této verifikaci (`superseded_by_id`) se vrátí do PENDING, na Discord se zařadí úprava původní zprávy a oprava s novým progresem. Když oznámení ještě neodešlo, jen se zruší (`cancelled`) a úprava ani oprava se neposílá.
+  - OPR-3 znovuotevření: REJECTED nebo REVOKED → PENDING, staré rozhodnutí se smaže ze žádosti (zůstává v auditu). Nejde, když je milník ověřený jinou žádostí nebo když hráč už má u milníku jinou čekající žádost.
+  - OPR-4 změna ověřujícího admina (jen na admina).
+  - OPR-5 veřejná nebo interní poznámka, prostý text.
+- Politiky `correct` (stejné pravidlo jako u rozhodování, tedy ne u vlastní žádosti) a `addNote`.
+- `/admin/submissions` (OPR-1): všechny žádosti s filtrem podle stavu, milníku, hráče (jméno nebo Discord ID) a admina, stránkování.
+- `/admin/audit` (OPR-7): historie změn s filtrem podle akce, admina a ID žádosti, stará a nová hodnota čitelně česky (stavy, jména adminů místo ID).
+- Admin detail žádosti ukazuje u rozhodnutých žádostí panel Opravy a u každé žádosti její historii z auditu.
+- Detail milníku: veřejná historie ověřené žádosti (ověřeno, odesláno, oznámeno na Discordu), důkazy a veřejné poznámky (HIS-1). Admin navíc vidí interní poznámky a blok „Dřívější pokusy“ se zamítnutými, zrušenými, staženými a uzavřenými žádostmi a důvody (HIS-2) a odkazy na opravy. Aktuální jméno a jméno z doby odeslání (HIS-3).
+- Ochranný test překladů: všech 324 literálních klíčů v kódu a šablonách musí existovat v `lang/cs`.
+- Testy (137), mimo jiné akceptační kritérium „zrušení verifikace sníží progres o 1 a Indo Potential o 25, vrátí SUPERSEDED claimy do PENDING, upraví zprávu na Discordu a zapíše audit“ (úprava zprávy je ve frontě, odeslání je etapa 6).
+
+**Rozhodnutí**
+
+- Při znovuotevření se z řádku žádosti smaže staré rozhodnutí (admin, čas, důvod). Úplná historie zůstává v auditu a je vidět v adminu u žádosti.
+- Zrušit ověření, znovu otevřít a změnit admina nejde u vlastní žádosti (stejně jako ADM-7). Poznámku může přidat kterýkoli admin.
+- Veřejnost vidí historii jen u ověřené žádosti. Předchozí pokusy vidí jen admini (HIS-2).
+- Akce v auditu mají kódy s tečkou (`submission.approved`), překladové klíče s podtržítkem (`submission_approved`), protože Laravel bere tečku jako zanoření.
+
+**Opravená chyba**
+
+- Popisky akcí v historii změn se zobrazovaly jako surový klíč. Příčina výše, test překladů to teď hlídá obecně.
