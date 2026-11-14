@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Genetic Mastery'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,11 +78,15 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'cs'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'cs'),
 
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'cs_CZ'),
+
+    // Fallback time zone for rendering times on the server. The browser
+    // re-renders every <time> element in its own time zone (NF-4).
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'Europe/Prague'),
 
     /*
     |--------------------------------------------------------------------------

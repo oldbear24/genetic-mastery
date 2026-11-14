@@ -6,25 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            // Discord snowflakes are 64-bit, stored as text to stay portable.
+            $table->string('discord_id', 32)->unique();
+            $table->string('username');
+            $table->string('global_name')->nullable();
+            $table->string('guild_nickname')->nullable();
+            // Server nickname, otherwise global_name, otherwise username (AUTH-5).
+            $table->string('display_name');
+            $table->string('avatar_hash')->nullable();
+            $table->boolean('is_admin')->default(false);
+            $table->boolean('is_member')->default(true);
+            $table->timestamp('roles_checked_at')->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -37,13 +36,9 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('users');
     }
 };

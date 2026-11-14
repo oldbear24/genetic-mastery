@@ -1,0 +1,30 @@
+# Production-like setup. Put a TLS-terminating proxy (Caddy, Traefik, host
+# nginx) in front of port 8080: Discord OAuth and interactions need HTTPS.
+services:
+  app:
+    build: .
+    image: genetic-mastery:latest
+    env_file: .env
+    environment:
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "8080:80"
+    volumes:
+      - storage:/var/www/html/storage
+    restart: unless-stopped
+
+  # Runs the Laravel scheduler (Discord outbox, role refresh, backups).
+  scheduler:
+    image: genetic-mastery:latest
+    env_file: .env
+    environment:
+      RUN_MIGRATIONS: "false"
+    command: ["su-exec", "www-data", "php", "artisan", "schedule:work"]
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  storage:

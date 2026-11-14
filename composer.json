@@ -1,14 +1,24 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "genetic-mastery/web",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "Genetic Mastery: shared milestone tracker for an ARK cluster.",
+    "keywords": [
+        "laravel",
+        "ark",
+        "discord"
+    ],
+    "license": "proprietary",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
+        "ext-fileinfo": "*",
+        "ext-gd": "*",
+        "ext-pdo": "*",
+        "ext-sodium": "*",
         "laravel/framework": "^13.17",
-        "laravel/tinker": "^3.0"
+        "laravel/socialite": "^5.32",
+        "laravel/tinker": "^3.0",
+        "socialiteproviders/discord": "^4.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -17,6 +27,8 @@
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
+        "pestphp/pest": "^4.7",
+        "pestphp/pest-plugin-laravel": "^4.1",
         "phpunit/phpunit": "^12.5.12"
     },
     "autoload": {

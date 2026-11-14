@@ -28,6 +28,18 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'discord' => [
+        'client_id' => env('DISCORD_CLIENT_ID'),
+        'client_secret' => env('DISCORD_CLIENT_SECRET'),
+        'redirect' => env('DISCORD_REDIRECT_URI', '/auth/discord/callback'),
+        'bot_token' => env('DISCORD_BOT_TOKEN'),
+        'public_key' => env('DISCORD_PUBLIC_KEY'),
+        'application_id' => env('DISCORD_APPLICATION_ID', env('DISCORD_CLIENT_ID')),
+        'guild_id' => env('DISCORD_GUILD_ID'),
+        'announce_channel_id' => env('DISCORD_ANNOUNCE_CHANNEL_ID'),
+        'api_base' => env('DISCORD_API_BASE', 'https://discord.com/api/v10'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
