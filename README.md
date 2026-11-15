@@ -104,6 +104,17 @@ Update with `docker compose pull && docker compose up -d`; pin a version with
 `GENETIC_IMAGE=ghcr.io/oldbear24/genetic-mastery:sha-1a2b3c4` in the shell or
 in `.env`.
 
+### Coolify
+
+1. New resource → Public Repository → this repo, build pack **Docker Compose**,
+   **Docker Compose Location** `/docker-compose.coolify.yml`.
+2. Domain of the `app` service: `https://<host>` (no port; the proxy routes to
+   container port 80 and terminates TLS, nothing is published on the host).
+3. Environment Variables: fill in the required ones (`APP_KEY`, `APP_URL` equal
+   to the domain, the Discord values) and `ADMIN_ROLE_IDS` / `ADMIN_USER_IDS`.
+4. Deploy. `app` reports healthy once migrations ran and `/up` answers; the
+   scheduler starts after that.
+
 Build from a checkout instead of pulling:
 
 ```sh

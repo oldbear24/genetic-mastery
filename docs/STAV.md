@@ -280,13 +280,14 @@ Požadavek: nasadit na WEDOS s MySQL nebo SQLite. Návod je v `docs/NASAZENI-WED
 - Obraz jen pro `linux/amd64`. Sestavení pro arm64 přes emulaci by kvůli kompilaci rozšíření PHP trvalo mnohem déle. Přidat ho jde jedním řádkem `platforms`, až bude potřeba.
 - Obraz se nahraje až po úspěšných testech a smoke testu, nikdy z PR.
 - Běh na `main` se nepřerušuje novějším pushem, aby nahrávání obrazu neskončilo napůl.
+- Pro Coolify je samostatný `docker-compose.coolify.yml`: bez publikovaných portů (první nasazení padalo na obsazeném portu 8080, provoz vede proxy Coolify), proměnné jako `${VAR}`, aby je Coolify ukázalo v UI, povinné jako `${VAR:?}`. `app` má healthcheck na `/up` a plánovač startuje až po něm. Externí databáze tam zatím není, běží SQLite ve volume.
 
 ## Co zůstává otevřené
 
 - **MySQL/MariaDB a PostgreSQL**: sada lokálně běžela jen na SQLite (lokální databázový server nemám povolený). MySQL část (generované sloupce, triggery, PHP dump) ověří až CI.
 - **Skutečný WEDOS**: nasazení je ověřené simulací, ne na hostingu. Kontrola `/ops/deploy/check` a test nahrávání ukážou případné rozdíly (hlavně `open_basedir` a dočasné soubory uploadu).
 - **PostgreSQL**: první běh CI odhalil dva testy, které čekaly chybu databáze uvnitř transakce testu; PostgreSQL po chybě odmítá další dotazy. Očekávané chyby teď běží v savepointu (`DB::transaction`). Produkční kód to netýká.
-- **Docker obraz** se poprvé sestaví v CI (Docker na vývojovém stroji není).
+- **Docker obraz** se sestavuje v CI a projde smoke testem (Docker na vývojovém stroji není). Nasazení v Coolify zatím neběželo celé.
 - **Skutečný Discord**: OAuth, bot a interakce jsou ověřené jen proti mockům. Při prvním nasazení projít postup v části Etapa 6.
 - **Verze 1.1**: DM hráči o rozhodnutí (DC-6).
 - Otázky ze zadání, u kterých platí výchozí odpověď: souběžné claimy rozhoduje admin (pořadí a potvrzení pozdějšího), self-approve řídí `ALLOW_SELF_APPROVE`, jméno objevitele je přezdívka na serveru, bez sezón, 250 jsou body včetně mutací.

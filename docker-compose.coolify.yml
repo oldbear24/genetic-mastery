@@ -1,0 +1,80 @@
+# Coolify: Docker Compose resource from this repository with
+# "Docker Compose Location" set to /docker-compose.coolify.yml.
+#
+# - Domain: set it on the "app" service as https://<host> (no port, the
+#   container listens on 80). Coolify's proxy terminates TLS; no ports are
+#   published on the host.
+# - Variables: every ${VAR} below shows up under Environment Variables;
+#   ${VAR:?} ones are required. APP_URL must equal the domain, and the Discord
+#   OAuth2 redirect is <APP_URL>/auth/discord/callback.
+# - Generate APP_KEY with: echo "base64:$(openssl rand -base64 32)"
+services:
+  app:
+    image: ${GENETIC_IMAGE:-ghcr.io/oldbear24/genetic-mastery:latest}
+    pull_policy: always
+    environment:
+      RUN_MIGRATIONS: "true"
+      TRUSTED_PROXIES: "*"
+      APP_KEY: ${APP_KEY:?}
+      APP_URL: ${APP_URL:?}
+      CLUSTER_NAME: ${CLUSTER_NAME:-}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:?}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?}
+      DISCORD_PUBLIC_KEY: ${DISCORD_PUBLIC_KEY:?}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:?}
+      DISCORD_ANNOUNCE_CHANNEL_ID: ${DISCORD_ANNOUNCE_CHANNEL_ID:?}
+      ADMIN_ROLE_IDS: ${ADMIN_ROLE_IDS:-}
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
+      ALLOW_SELF_APPROVE: ${ALLOW_SELF_APPROVE:-false}
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-15}
+      UPLOAD_MAX_FILES: ${UPLOAD_MAX_FILES:-10}
+      UPLOAD_MAX_TOTAL_MB: ${UPLOAD_MAX_TOTAL_MB:-60}
+      BACKUP_ENABLED: ${BACKUP_ENABLED:-true}
+      BACKUP_EVERY_HOURS: ${BACKUP_EVERY_HOURS:-24}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+    volumes:
+      - storage:/var/www/html/storage
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # Laravel scheduler: Discord outbox, role refresh, backups.
+  scheduler:
+    image: ${GENETIC_IMAGE:-ghcr.io/oldbear24/genetic-mastery:latest}
+    pull_policy: always
+    command: ["su-exec", "www-data", "php", "artisan", "schedule:work"]
+    environment:
+      RUN_MIGRATIONS: "false"
+      TRUSTED_PROXIES: "*"
+      APP_KEY: ${APP_KEY:?}
+      APP_URL: ${APP_URL:?}
+      CLUSTER_NAME: ${CLUSTER_NAME:-}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:?}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?}
+      DISCORD_PUBLIC_KEY: ${DISCORD_PUBLIC_KEY:?}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:?}
+      DISCORD_ANNOUNCE_CHANNEL_ID: ${DISCORD_ANNOUNCE_CHANNEL_ID:?}
+      ADMIN_ROLE_IDS: ${ADMIN_ROLE_IDS:-}
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
+      ALLOW_SELF_APPROVE: ${ALLOW_SELF_APPROVE:-false}
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-15}
+      UPLOAD_MAX_FILES: ${UPLOAD_MAX_FILES:-10}
+      UPLOAD_MAX_TOTAL_MB: ${UPLOAD_MAX_TOTAL_MB:-60}
+      BACKUP_ENABLED: ${BACKUP_ENABLED:-true}
+      BACKUP_EVERY_HOURS: ${BACKUP_EVERY_HOURS:-24}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+    volumes:
+      - storage:/var/www/html/storage
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  storage:
