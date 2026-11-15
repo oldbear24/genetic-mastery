@@ -1,9 +1,16 @@
-# Production-like setup. Put a TLS-terminating proxy (Caddy, Traefik, host
-# nginx) in front of port 8080: Discord OAuth and interactions need HTTPS.
+# Production setup with the image from GitHub Container Registry, built by CI
+# from main. Put a TLS-terminating proxy (Caddy, Traefik, host nginx) in front
+# of port 8080: Discord OAuth and interactions need HTTPS.
+#
+#   docker compose pull && docker compose up -d
+#
+# Build from source instead:
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+#
+# GENETIC_IMAGE picks another tag, e.g. ghcr.io/oldbear24/genetic-mastery:sha-1a2b3c4.
 services:
   app:
-    build: .
-    image: genetic-mastery:latest
+    image: ${GENETIC_IMAGE:-ghcr.io/oldbear24/genetic-mastery:latest}
     env_file: .env
     environment:
       RUN_MIGRATIONS: "true"
@@ -16,7 +23,7 @@ services:
 
   # Runs the Laravel scheduler (Discord outbox, role refresh, backups).
   scheduler:
-    image: genetic-mastery:latest
+    image: ${GENETIC_IMAGE:-ghcr.io/oldbear24/genetic-mastery:latest}
     env_file: .env
     environment:
       RUN_MIGRATIONS: "false"

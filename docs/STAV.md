@@ -26,7 +26,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 - Čeština: `APP_LOCALE=cs`, `lang/cs` (validace, auth, stránkování, `app.php`), Carbon s locale `cs`. Anglické jazykové soubory jsou odstraněné.
 - Relace 7 dní, cookie `HttpOnly`, `SameSite=Lax`, `Secure` v produkci.
 - Docker: vícestupňový `Dockerfile` (assets, vendor, runtime `php:8.4-fpm-alpine` s nginx a PHP-FPM pod supervisord), `docker-compose.yml` s kontejnery `app` a `scheduler`, limity PHP a nginx pro upload.
-- CI: `.github/workflows/tests.yml`, matice SQLite a PostgreSQL 17, kontrola stylu přes Pint.
+- CI: `.github/workflows/ci.yml`, matice SQLite a PostgreSQL 17, kontrola stylu přes Pint.
 - Testy: seed (54 milníků, unikátní kódy, 9 × 6, hodnota 250, pořadí, idempotence), konfigurace (čeština, UTC, výchozí pravidla, SQLite IMMEDIATE a WAL, relace), health check.
 
 **Rozhodnutí**
@@ -236,7 +236,7 @@ Nové sezení začni přečtením tohoto souboru. Zadání je v `docs/ZADANI.md`
 | Admin neschválí vlastní claim při `ALLOW_SELF_APPROVE=false` | `Admin/ReviewTest.php` |
 | Výpadek Discordu: schválení projde, oznámení odejde po obnovení právě jednou | `Discord/OutboxTest.php` |
 | Interactions: PING, neplatný podpis 401, odpověď do 1 s | `Discord/InteractionsTest.php` |
-| Celá sada na SQLite i PostgreSQL | `.github/workflows/tests.yml` (lokálně ověřeno jen SQLite) |
+| Celá sada na SQLite i PostgreSQL | `.github/workflows/ci.yml` (lokálně ověřeno jen SQLite) |
 
 ## Nasazení na WEDOS a MySQL/MariaDB (po etapě 7)
 
@@ -267,13 +267,26 @@ Požadavek: nasadit na WEDOS s MySQL nebo SQLite. Návod je v `docs/NASAZENI-WED
 - `DISCORD_SEND_AFTER_RESPONSE` je vypnuté kvůli pravidlu z `CLAUDE.md` a DC-4 („nikdy přímo z requestu“). Bez doplňku CRON+ tak oznámení může čekat až hodinu. **Otevřená otázka pro vlastníka:** zapnout odeslání po odpovědi, nebo si přikoupit CRON+?
 - `CLAUDE.md` doplněno: vše musí fungovat i na MySQL/MariaDB.
 
+## GitHub a Docker obraz (15. 11. 2026)
+
+**Hotovo**
+
+- Veřejný repozitář `github.com/oldbear24/genetic-mastery` (viditelnost rozhodl vlastník).
+- Workflow `.github/workflows/ci.yml` (dřív `tests.yml`): po zelené matici testů na `main`, na tagu `v*` nebo při ručním spuštění sestaví obraz, spustí ho (migrace, seed, `/up` a hlavní stránka) a nahraje do `ghcr.io/oldbear24/genetic-mastery`. Tagy `latest` (main), `sha-<commit>`, u tagu `v1.2.3` i `1.2.3` a `1.2`. Cache vrstev přes GitHub Actions.
+- `docker-compose.yml` bere obraz z GHCR (`GENETIC_IMAGE` přepíše tag), server tak potřebuje jen tento soubor a `.env`. Sestavení ze zdrojáků přes `docker-compose.build.yml`.
+
+**Rozhodnutí**
+
+- Obraz jen pro `linux/amd64`. Sestavení pro arm64 přes emulaci by kvůli kompilaci rozšíření PHP trvalo mnohem déle. Přidat ho jde jedním řádkem `platforms`, až bude potřeba.
+- Obraz se nahraje až po úspěšných testech a smoke testu, nikdy z PR.
+- Běh na `main` se nepřerušuje novějším pushem, aby nahrávání obrazu neskončilo napůl.
+
 ## Co zůstává otevřené
 
 - **MySQL/MariaDB a PostgreSQL**: sada lokálně běžela jen na SQLite (lokální databázový server nemám povolený). MySQL část (generované sloupce, triggery, PHP dump) ověří až CI.
 - **Skutečný WEDOS**: nasazení je ověřené simulací, ne na hostingu. Kontrola `/ops/deploy/check` a test nahrávání ukážou případné rozdíly (hlavně `open_basedir` a dočasné soubory uploadu).
 - **PostgreSQL**: sada lokálně běžela jen na SQLite. Lokální PostgreSQL server se mi nepodařilo spustit (spuštění serveru nebylo povolené). Ověří ho první běh GitHub Actions. Největší riziko je PostgreSQL trigger pro audit log v migraci `2026_11_14_000400`.
-- **Docker obraz** nebyl sestaven (Docker na vývojovém stroji není).
-- **GitHub remote**: repozitář je jen lokální, CI zatím neběželo.
+- **Docker obraz** se poprvé sestaví v CI (Docker na vývojovém stroji není).
 - **Skutečný Discord**: OAuth, bot a interakce jsou ověřené jen proti mockům. Při prvním nasazení projít postup v části Etapa 6.
 - **Verze 1.1**: DM hráči o rozhodnutí (DC-6).
 - Otázky ze zadání, u kterých platí výchozí odpověď: souběžné claimy rozhoduje admin (pořadí a potvrzení pozdějšího), self-approve řídí `ALLOW_SELF_APPROVE`, jméno objevitele je přezdívka na serveru, bez sezón, 250 jsou body včetně mutací.

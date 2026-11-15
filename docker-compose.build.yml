@@ -1,0 +1,11 @@
+# Override for building the image from this checkout instead of pulling it:
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+services:
+  app:
+    build: .
+    image: genetic-mastery:local
+    pull_policy: build
+
+  scheduler:
+    image: genetic-mastery:local
+    pull_policy: never

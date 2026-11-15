@@ -61,7 +61,7 @@ DB_USERNAME=genetic DB_PASSWORD=genetic vendor/bin/pest
 ```
 
 GitHub Actions runs the suite on SQLite, PostgreSQL, MySQL 8.4 and
-MariaDB 10.11 and checks the code style with Pint (`.github/workflows/tests.yml`).
+MariaDB 10.11 and checks the code style with Pint (`.github/workflows/ci.yml`).
 
 ## Discord setup
 
@@ -77,9 +77,37 @@ MariaDB 10.11 and checks the code style with Pint (`.github/workflows/tests.yml`
 
 ## Docker
 
+CI builds the image after the test matrix passes on `main` (and on `v*` tags),
+smoke-tests it and pushes it to GitHub Container Registry:
+
+| Tag | Source |
+| --- | --- |
+| `ghcr.io/oldbear24/genetic-mastery:latest` | newest `main` |
+| `ghcr.io/oldbear24/genetic-mastery:sha-<commit>` | every built commit |
+| `ghcr.io/oldbear24/genetic-mastery:1.2.3`, `:1.2` | tag `v1.2.3` |
+
+The server needs only `docker-compose.yml` and `.env`, no checkout:
+
 ```sh
-cp .env.example .env   # APP_KEY, APP_URL=https://…, APP_ENV=production, Discord values
-docker compose up -d --build
+mkdir genetic-mastery && cd genetic-mastery
+curl -fsSLO https://raw.githubusercontent.com/oldbear24/genetic-mastery/main/docker-compose.yml
+curl -fsSL -o .env https://raw.githubusercontent.com/oldbear24/genetic-mastery/main/.env.example
+# Fill in .env: APP_KEY, APP_URL=https://…, APP_ENV=production, Discord values.
+# APP_KEY: echo "base64:$(openssl rand -base64 32)"
+docker compose pull && docker compose up -d
+```
+
+If the repository is private, so is the image: log in first with
+`docker login ghcr.io -u <github-user>` and a personal access token with the
+`read:packages` scope (the `curl` downloads then need `gh` or a token too).
+Update with `docker compose pull && docker compose up -d`; pin a version with
+`GENETIC_IMAGE=ghcr.io/oldbear24/genetic-mastery:sha-1a2b3c4` in the shell or
+in `.env`.
+
+Build from a checkout instead of pulling:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 ```
 
 - `app`: nginx + PHP-FPM on port 8080, runs migrations and the milestone seed

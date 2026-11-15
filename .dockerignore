@@ -16,5 +16,5 @@ storage/database/*
 database/*.sqlite*
 tests
 design
-docker-compose.yml
+docker-compose*.yml
 .phpunit.cache
