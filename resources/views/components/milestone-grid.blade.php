@@ -25,7 +25,8 @@
         <tbody>
             @foreach ($grid as $row)
                 <tr>
-                    <th scope="row" class="py-2 pr-1 pl-4 text-left font-normal {{ $loop->last ? '' : 'border-b border-line-soft' }}">
+                    <th scope="row" class="relative isolate overflow-hidden py-2 pr-1 pl-4 text-left font-normal {{ $loop->last ? '' : 'border-b border-line-soft' }}">
+                        <x-species-art :code="$row['code']" class="species-art-row top-1 right-2 h-[calc(100%-0.25rem)] w-[120px] opacity-60" />
                         <span class="flex flex-col gap-0.5">
                             <span class="text-[15px] font-semibold text-ink">{{ $row['name'] }}</span>
                             @if ($showCounts)
@@ -50,7 +51,8 @@
 
 <div class="flex flex-col gap-3 md:hidden">
     @foreach ($grid as $row)
-        <section class="card p-4" aria-label="{{ $row['name'] }}">
+        <section class="card relative isolate overflow-hidden p-4" aria-label="{{ $row['name'] }}">
+            <x-species-art :code="$row['code']" class="species-art-row top-1.5 right-28 h-14 w-28 opacity-50" />
             <div class="mb-3 flex items-baseline justify-between gap-2">
                 <h3 class="m-0 text-[15px] font-semibold">{{ $row['name'] }}</h3>
                 @if ($showCounts)

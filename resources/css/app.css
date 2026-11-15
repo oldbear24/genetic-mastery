@@ -82,6 +82,28 @@
     @apply rounded-2xl border border-line bg-surface;
 }
 
+/*
+ * Species render behind content: the container needs `relative isolate
+ * overflow-hidden`, the image sits at z -1. It is fitted whole into its box
+ * (never cropped, so every species gets the same height). The files face
+ * right; the tail fades into the text on the left and the feet into the
+ * bottom, the head stays sharp. Pick -row (grid) or -card (counters).
+ */
+@utility species-art {
+    @apply pointer-events-none absolute -z-10 max-w-none object-contain select-none;
+    mask-composite: intersect;
+}
+
+@utility species-art-row {
+    @apply object-right-bottom;
+    mask-image: linear-gradient(to right, transparent 0%, #000 45%), linear-gradient(to top, transparent 0%, #000 40%);
+}
+
+@utility species-art-card {
+    @apply object-right;
+    mask-image: linear-gradient(to right, transparent 0%, #000 45%), linear-gradient(to top, transparent 0%, #000 15%);
+}
+
 @utility label-caps {
     @apply font-display text-sm font-semibold tracking-[0.14em] text-ink-label uppercase;
 }

@@ -282,6 +282,21 @@ Požadavek: nasadit na WEDOS s MySQL nebo SQLite. Návod je v `docs/NASAZENI-WED
 - Běh na `main` se nepřerušuje novějším pushem, aby nahrávání obrazu neskončilo napůl.
 - Pro Coolify je samostatný `docker-compose.coolify.yml`: bez publikovaných portů (první nasazení padalo na obsazeném portu 8080, provoz vede proxy Coolify), proměnné jako `${VAR}`, aby je Coolify ukázalo v UI, povinné jako `${VAR:?}`. `app` má healthcheck na `/up` a plánovač startuje až po něm. Externí databáze tam zatím není, běží SQLite ve volume.
 
+## Obrázky druhů (15. 11. 2026)
+
+**Hotovo**
+
+- Rendery všech 9 druhů z Dododexu (`dododex.com/media/creature/*.png`) převedené na WebP s průhledností v `public/images/species/{kód}.webp` (např. `rex.webp`, `giga.webp`), celkem asi 220 kB.
+- Komponenta `<x-species-art>` a helper `App\Support\SpeciesImage`. Obrázek je dekorativní (prázdný `alt`), leží za obsahem a ocasem mizí přechodem do textu, nohama dolů. Druh bez souboru se zobrazí bez obrázku.
+- Mřížka milníků: obrázek ve sloupci Druh (desktop) a v hlavičce karty druhu (mobil), takže ho má i dashboard hráče. Hlavní stránka: za počítadlem GENETIC MASTERY líhnoucí se dinosaurus v inkubátoru (`public/images/genetic-mastery.webp`), za INDO POTENTIAL Indominus s Indoraptorem (`public/images/indo-potential.webp`). Oba obrázky dodal vlastník, jsou ořezané na neprůhlednou část a zmenšené.
+- `<x-counter-card image="…">` bere URL obrázku, `<x-species-art>` kód druhu (`code`) nebo URL (`src`). Varianty `species-art-row` (mřížka, obrázek dole vpravo) a `species-art-card` (počítadla, svisle na střed, slabší přechod dole).
+
+**Rozhodnutí**
+
+- Soubory jsou zrcadlově otočené, aby druhy hleděly doprava (na přání vlastníka). Obrázek se vejde do rámečku celý (`object-contain`), všechny druhy mají stejnou výšku a nic se neořezává.
+- Obrázky leží u nás, ne jako odkaz na Dododex: CSP (`img-src 'self'`) zůstává beze změny a web nezávisí na cizím serveru.
+- Původní obrázky jsou herní rendery z ARK (Studio Wildcard) převzaté z Dododexu. Pro komunitní web se to běžně toleruje, licence k nim ale není.
+
 ## Co zůstává otevřené
 
 - **MySQL/MariaDB a PostgreSQL**: sada lokálně běžela jen na SQLite (lokální databázový server nemám povolený). MySQL část (generované sloupce, triggery, PHP dump) ověří až CI.

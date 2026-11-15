@@ -1,10 +1,10 @@
 <x-layout :title="__('app.nav.milestones')" current="milestones" glow class="flex flex-col gap-10">
     {{-- HP-1: counters --}}
     <section aria-label="{{ __('app.counter.progress_aria') }}" class="grid gap-6 md:grid-cols-2">
-        <x-counter-card :label="__('app.counter.genetic_mastery')" :value="$summary['verified']" :max="$summary['total']" :bar-label="__('app.counter.progress_aria')">
+        <x-counter-card :label="__('app.counter.genetic_mastery')" :value="$summary['verified']" :max="$summary['total']" :bar-label="__('app.counter.progress_aria')" :image="asset('images/genetic-mastery.webp')">
             {{ __('app.counter.verified_across', ['percent' => \App\Support\Format::percent($summary['percent'])]) }}
         </x-counter-card>
-        <x-counter-card :label="__('app.counter.indo_potential')" :value="$summary['indo']" :max="$summary['indo_max']" :bar-label="__('app.counter.indo_aria')">
+        <x-counter-card :label="__('app.counter.indo_potential')" :value="$summary['indo']" :max="$summary['indo_max']" :bar-label="__('app.counter.indo_aria')" :image="asset('images/indo-potential.webp')">
             {{ __('app.counter.indo_formula', ['base' => config('genetic.indo.base'), 'per' => config('genetic.indo.per_milestone')]) }}
         </x-counter-card>
     </section>

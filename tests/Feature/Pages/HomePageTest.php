@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Submission;
+use App\Support\SpeciesImage;
 
 it('is public and shows the 9 × 6 grid in Czech', function () {
     $response = $this->get('/')->assertOk();
@@ -77,4 +78,29 @@ it('renders the milestone detail of a verified milestone publicly', function () 
 
 it('returns 404 for an unknown milestone code', function () {
     $this->get('/milestones/NOPE_HEALTH_250')->assertNotFound()->assertSee('Stránka nenalezena');
+});
+
+it('has a species image for every configured species', function () {
+    foreach (array_keys(config('genetic.species')) as $code) {
+        expect(SpeciesImage::url($code))->not->toBeNull('Missing public/images/species/'.strtolower($code).'.webp');
+    }
+});
+
+it('shows species images in the grid and behind the counters', function () {
+    $response = $this->get('/')->assertOk();
+
+    foreach (array_keys(config('genetic.species')) as $code) {
+        $response->assertSee(SpeciesImage::url($code), false);
+    }
+
+    foreach (['genetic-mastery', 'indo-potential'] as $image) {
+        $response->assertSee(asset("images/{$image}.webp"), false);
+        expect(public_path("images/{$image}.webp"))->toBeFile();
+    }
+});
+
+it('renders a species without an image file without the image', function () {
+    expect(SpeciesImage::url('NOPE'))->toBeNull();
+
+    $this->blade('<x-species-art code="NOPE" />')->assertDontSee('<img', false);
 });
