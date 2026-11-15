@@ -285,7 +285,7 @@ Požadavek: nasadit na WEDOS s MySQL nebo SQLite. Návod je v `docs/NASAZENI-WED
 
 - **MySQL/MariaDB a PostgreSQL**: sada lokálně běžela jen na SQLite (lokální databázový server nemám povolený). MySQL část (generované sloupce, triggery, PHP dump) ověří až CI.
 - **Skutečný WEDOS**: nasazení je ověřené simulací, ne na hostingu. Kontrola `/ops/deploy/check` a test nahrávání ukážou případné rozdíly (hlavně `open_basedir` a dočasné soubory uploadu).
-- **PostgreSQL**: sada lokálně běžela jen na SQLite. Lokální PostgreSQL server se mi nepodařilo spustit (spuštění serveru nebylo povolené). Ověří ho první běh GitHub Actions. Největší riziko je PostgreSQL trigger pro audit log v migraci `2026_11_14_000400`.
+- **PostgreSQL**: první běh CI odhalil dva testy, které čekaly chybu databáze uvnitř transakce testu; PostgreSQL po chybě odmítá další dotazy. Očekávané chyby teď běží v savepointu (`DB::transaction`). Produkční kód to netýká.
 - **Docker obraz** se poprvé sestaví v CI (Docker na vývojovém stroji není).
 - **Skutečný Discord**: OAuth, bot a interakce jsou ověřené jen proti mockům. Při prvním nasazení projít postup v části Etapa 6.
 - **Verze 1.1**: DM hráči o rozhodnutí (DC-6).

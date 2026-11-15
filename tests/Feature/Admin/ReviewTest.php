@@ -277,10 +277,12 @@ describe('audit log', function () {
         $this->actingAs(admin())->post(route('admin.submissions.reject', $claim), ['reason' => 'Chybí předci.']);
         $entry = AuditLog::query()->sole();
 
-        expect(fn () => $entry->update(['reason' => 'changed']))->toThrow(LogicException::class)
-            ->and(fn () => $entry->delete())->toThrow(LogicException::class)
-            ->and(fn () => DB::table('audit_log')->update(['reason' => 'changed']))->toThrow(QueryException::class)
-            ->and(fn () => DB::table('audit_log')->delete())->toThrow(QueryException::class);
+        // Each attempt runs in a savepoint: PostgreSQL aborts the surrounding
+        // test transaction after a failed statement otherwise.
+        expect(fn () => DB::transaction(fn () => $entry->update(['reason' => 'changed'])))->toThrow(LogicException::class)
+            ->and(fn () => DB::transaction(fn () => $entry->delete()))->toThrow(LogicException::class)
+            ->and(fn () => DB::transaction(fn () => DB::table('audit_log')->update(['reason' => 'changed'])))->toThrow(QueryException::class)
+            ->and(fn () => DB::transaction(fn () => DB::table('audit_log')->delete()))->toThrow(QueryException::class);
 
         expect(AuditLog::query()->sole()->reason)->toBe('Chybí předci.');
     });

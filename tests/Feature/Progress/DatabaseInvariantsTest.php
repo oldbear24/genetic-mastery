@@ -3,11 +3,15 @@
 use App\Enums\SubmissionStatus;
 use App\Models\Submission;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
+
+// Expected violations run in a savepoint (DB::transaction inside the test
+// transaction): PostgreSQL aborts the whole transaction after a failed statement.
 
 it('allows at most one verified submission per milestone (database index)', function () {
     Submission::factory()->onMilestone('GIGA_MELEE_250')->verified()->create();
 
-    expect(fn () => Submission::factory()->onMilestone('GIGA_MELEE_250')->verified()->create())
+    expect(fn () => DB::transaction(fn () => Submission::factory()->onMilestone('GIGA_MELEE_250')->verified()->create()))
         ->toThrow(UniqueConstraintViolationException::class);
 
     expect(Submission::query()->verified()->count())->toBe(1);
@@ -24,7 +28,7 @@ it('allows a player only one pending claim per milestone (database index)', func
     $joe = player();
     Submission::factory()->for($joe)->onMilestone('REX_MELEE_250')->create();
 
-    expect(fn () => Submission::factory()->for($joe)->onMilestone('REX_MELEE_250')->create())
+    expect(fn () => DB::transaction(fn () => Submission::factory()->for($joe)->onMilestone('REX_MELEE_250')->create()))
         ->toThrow(UniqueConstraintViolationException::class);
 });
 
