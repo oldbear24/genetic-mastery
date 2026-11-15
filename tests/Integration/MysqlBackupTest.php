@@ -45,7 +45,7 @@ it('dumps schema and data in PHP and passes the restore test', function () {
     expect($verify)->toMatchArray([
         'ok' => true,
         'integrity' => 'ok',
-        'milestones' => 54,
+        'milestones' => 60,
         'submissions' => 1,
         'images' => 1,
     ]);
@@ -62,5 +62,5 @@ it('restores into an empty database with the same rows', function () {
     DB::unprepared(gzdecode(Storage::disk('backup')->get($result['snapshot'])));
 
     expect(Submission::query()->orderBy('id')->pluck('public_id')->all())->toBe($before)
-        ->and(DB::table('milestones')->count())->toBe(54);
+        ->and(DB::table('milestones')->count())->toBe(60);
 });

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\CorrectionController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\SpeciesController;
 use App\Http\Controllers\Admin\SubmissionListController;
 use App\Http\Controllers\Auth\DiscordLoginController;
 use App\Http\Controllers\DashboardController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\MilestoneController;
+use App\Http\Controllers\SpeciesArtController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Middleware\RelocateUnreadableUploads;
 use App\Models\User;
@@ -30,6 +32,9 @@ Route::get('/evidence/{image:storage_key}/{variant}', [EvidenceController::class
     ->whereUuid('image')
     ->whereIn('variant', ['display', 'thumb', 'original'])
     ->name('evidence.show');
+Route::get('/species-art/{species:code}/{version}', SpeciesArtController::class)
+    ->where('version', '[0-9a-f]{16}')
+    ->name('species.art');
 
 // Discord login
 Route::middleware('guest')->group(function () {
@@ -65,6 +70,15 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group
     Route::post('/submissions/{submission:public_id}/verifier', [CorrectionController::class, 'changeVerifier'])->name('submissions.verifier');
     Route::post('/submissions/{submission:public_id}/notes', [CorrectionController::class, 'addNote'])->name('submissions.notes');
     Route::get('/audit', AuditLogController::class)->name('audit');
+
+    Route::get('/species', [SpeciesController::class, 'index'])->name('species');
+    Route::post('/species', [SpeciesController::class, 'store'])
+        ->middleware(RelocateUnreadableUploads::class)
+        ->name('species.store');
+    Route::put('/species/{species:code}', [SpeciesController::class, 'update'])
+        ->middleware(RelocateUnreadableUploads::class)
+        ->name('species.update');
+    Route::post('/species/{species:code}/move', [SpeciesController::class, 'move'])->name('species.move');
 });
 
 // Local development only: signed login links from `php artisan dev:login`.

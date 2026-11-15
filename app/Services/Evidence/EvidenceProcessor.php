@@ -158,8 +158,14 @@ class EvidenceProcessor
         return $name->isEmpty() ? 'image' : (string) $name;
     }
 
-    /** @param array{mime: string, width: int, height: int, bytes: int} $info */
-    private function decode(string $path, array $info, string $name): GdImage
+    /**
+     * Decode the pixels of a file that passed inspect().
+     *
+     * @param  array{mime: string, width: int, height: int, bytes: int}  $info
+     *
+     * @throws InvalidEvidence
+     */
+    public function decode(string $path, array $info, string $name): GdImage
     {
         $this->ensureMemoryFor($info['width'], $info['height']);
 

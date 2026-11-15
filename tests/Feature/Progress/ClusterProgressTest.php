@@ -11,27 +11,27 @@ it('computes progress and Indo Potential from verified milestones', function (in
     $summary = app(ClusterProgress::class)->summary();
 
     expect($summary['verified'])->toBe($verified)
-        ->and($summary['total'])->toBe(54)
+        ->and($summary['total'])->toBe(60)
         ->and($summary['indo'])->toBe($indo)
-        ->and($summary['indo_max'])->toBe(1500);
+        ->and($summary['indo_max'])->toBe(1650);
 })->with([
     'nothing verified' => [0, 150],
     '18 verified' => [18, 600],
     '23 verified' => [23, 725],
-    'all 54 verified' => [54, 1500],
+    'all 60 verified' => [60, 1650],
 ]);
 
-it('shows V / 54 and 150 + 25 × V on the home page', function (int $verified, int $indo) {
+it('shows V / total and 150 + 25 × V on the home page', function (int $verified, int $indo) {
     verifyMilestones($verified);
 
     $this->get('/')
         ->assertOk()
-        ->assertSeeInOrder(['GENETIC MASTERY', (string) $verified, '/ 54'])
-        ->assertSeeInOrder(['INDO POTENTIAL', (string) $indo, '/ 1500']);
+        ->assertSeeInOrder(['GENETIC MASTERY', (string) $verified, '/ 60'])
+        ->assertSeeInOrder(['INDO POTENTIAL', (string) $indo, '/ 1650']);
 })->with([
     [0, 150],
     [23, 725],
-    [54, 1500],
+    [60, 1650],
 ]);
 
 it('does not count pending, rejected, withdrawn or revoked submissions', function () {

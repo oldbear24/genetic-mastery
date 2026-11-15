@@ -4,7 +4,9 @@
     $state = $milestone->state();
     $verified = $milestone->verifiedSubmission;
 @endphp
-@if ($state === \App\Enums\MilestoneState::Verified)
+@if (! $milestone->isActive())
+    <x-milestone-disabled :milestone="$milestone" />
+@elseif ($state === \App\Enums\MilestoneState::Verified)
     <a href="{{ route('milestones.show', $milestone) }}" class="cell-verified" aria-label="{{ __('milestones.cell.aria_verified', ['milestone' => $milestone->title(), 'name' => $verified->user->display_name]) }}">
         <x-icon.check />
         <span class="flex min-w-0 flex-col leading-tight">

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Discord\CommandSync;
 use App\Services\Discord\DiscordClient;
 use App\Services\Discord\DiscordUnavailable;
 use App\Services\Discord\GeneticCommands;
@@ -9,8 +10,9 @@ use Illuminate\Console\Command;
 
 /**
  * Registers /genetic as a guild command for the cluster server. Guild
- * commands take effect immediately. Run once after deploying and whenever
- * the definitions change.
+ * commands take effect immediately. The maintenance run does the same on
+ * its own whenever the definition changes (CommandSync); this command is
+ * for doing it right now.
  */
 class RegisterDiscordCommands extends Command
 {
@@ -28,13 +30,17 @@ class RegisterDiscordCommands extends Command
             return self::FAILURE;
         }
 
+        $definitions = $commands->definitions();
+
         try {
-            $registered = $discord->overwriteGuildCommands($applicationId, $commands->definitions());
+            $registered = $discord->overwriteGuildCommands($applicationId, $definitions);
         } catch (DiscordUnavailable $e) {
             $this->error('Registration failed: '.$e->getMessage());
 
             return self::FAILURE;
         }
+
+        CommandSync::remember($definitions);
 
         $this->info('Registered: '.collect($registered)->pluck('name')->implode(', '));
 

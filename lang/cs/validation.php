@@ -174,6 +174,9 @@ return [
         'body' => 'text poznámky',
         'visibility' => 'viditelnost',
         'reviewer_id' => 'ověřující admin',
+        'image' => 'obrázek',
+        'code' => 'kód',
+        'name' => 'název',
     ],
 
 ];

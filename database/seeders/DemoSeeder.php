@@ -43,14 +43,18 @@ class DemoSeeder extends Seeder
         $grid = [
             'REX' => ['V:Joe', 'V:Kira', 'L', 'V:Joe', 'V:Marek', 'P:Kira'],
             'RAPTOR' => ['V:Eva', 'V:Eva', 'V:Ondra', 'L', 'V:Kira', 'V:Joe'],
-            'CARNO' => ['V:Marek', 'L', 'L', 'V:Kira', 'V:Marek', 'L'],
             'GIGA' => ['V:Ondra', 'L', 'L', 'L', 'V:Kira', 'V:Joe'],
+            'CARNO' => ['V:Marek', 'L', 'L', 'V:Kira', 'V:Marek', 'L'],
+            'CERATO' => ['L', 'P:Joe', 'L', 'V:Eva', 'L', 'L'],
             'THERI' => ['V:Eva', 'V:Ondra', 'L', 'L', 'P:Marek', 'L'],
-            'SPINO' => ['L', 'V:Marek', 'L', 'V:Eva', 'L', 'L'],
-            'ALLO' => ['V:Kira', 'L', 'P:Ondra', 'L', 'V:Joe', 'L'],
-            'YUTY' => ['L', 'L', 'L', 'V:Ondra', 'L', 'P:Eva'],
-            'MEGALO' => ['L', 'V:Eva', 'L', 'L', 'L', 'L'],
+            'DEINO' => ['L', 'V:Marek', 'L', 'V:Eva', 'L', 'L'],
+            'TUSO' => ['V:Kira', 'L', 'L', 'L', 'V:Joe', 'L'],
+            'BEELZE' => ['L', 'L', 'L', 'V:Ondra', 'L', 'P:Eva'],
+            'BASILISK' => ['L', 'V:Eva', 'L', 'L', 'L', 'L'],
         ];
+
+        // Shows a switched off stat: a sea creature has no Oxygen to level.
+        Milestone::query()->where('dinosaur', 'TUSO')->where('stat', 'OXYGEN')->update(['is_active' => false]);
 
         Submission::query()->delete();
 

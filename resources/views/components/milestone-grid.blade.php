@@ -26,11 +26,11 @@
             @foreach ($grid as $row)
                 <tr>
                     <th scope="row" class="relative isolate overflow-hidden py-2 pr-1 pl-4 text-left font-normal {{ $loop->last ? '' : 'border-b border-line-soft' }}">
-                        <x-species-art :code="$row['code']" class="species-art-row top-1 right-2 h-[calc(100%-0.25rem)] w-[120px] opacity-60" />
+                        <x-species-art :src="$row['image']" class="species-art-row top-1 right-2 h-[calc(100%-0.25rem)] w-[120px] opacity-60" />
                         <span class="flex flex-col gap-0.5">
                             <span class="text-[15px] font-semibold text-ink">{{ $row['name'] }}</span>
                             @if ($showCounts)
-                                <span class="font-mono text-xs text-ink-3">{{ __('milestones.grid.row_verified', ['count' => $row['verified'], 'total' => $row['milestones']->count()]) }}</span>
+                                <span class="font-mono text-xs text-ink-3">{{ __('milestones.grid.row_verified', ['count' => $row['verified'], 'total' => $row['total']]) }}</span>
                             @endif
                         </span>
                     </th>
@@ -52,11 +52,11 @@
 <div class="flex flex-col gap-3 md:hidden">
     @foreach ($grid as $row)
         <section class="card relative isolate overflow-hidden p-4" aria-label="{{ $row['name'] }}">
-            <x-species-art :code="$row['code']" class="species-art-row top-1.5 right-28 h-14 w-28 opacity-50" />
+            <x-species-art :src="$row['image']" class="species-art-row top-1.5 right-28 h-14 w-28 opacity-50" />
             <div class="mb-3 flex items-baseline justify-between gap-2">
                 <h3 class="m-0 text-[15px] font-semibold">{{ $row['name'] }}</h3>
                 @if ($showCounts)
-                    <span class="font-mono text-xs text-ink-3">{{ __('milestones.grid.row_verified', ['count' => $row['verified'], 'total' => $row['milestones']->count()]) }}</span>
+                    <span class="font-mono text-xs text-ink-3">{{ __('milestones.grid.row_verified', ['count' => $row['verified'], 'total' => $row['total']]) }}</span>
                 @endif
             </div>
             <ul class="m-0 grid list-none grid-cols-2 gap-2 p-0">

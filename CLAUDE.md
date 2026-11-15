@@ -1,6 +1,6 @@
 # Genetic Mastery
 
-Webová aplikace pro evidenci 54 genetických milníků ARK clusteru. Hráči posílají žádosti se screenshoty, admin je ručně ověřuje a web počítá společný progres clusteru a Indo Potential. Novinky oznamuje na Discordu.
+Webová aplikace pro evidenci genetických milníků ARK clusteru (druhy × 6 statů, druhy a vypnuté staty spravuje admin na `/admin/species`). Hráči posílají žádosti se screenshoty, admin je ručně ověřuje a web počítá společný progres clusteru a Indo Potential. Novinky oznamuje na Discordu.
 
 Závazné zadání: @docs/ZADANI.md
 

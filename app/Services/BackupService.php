@@ -15,9 +15,9 @@ use Symfony\Component\Process\Process;
 
 /**
  * Backups (kap. Zálohy): a consistent database snapshot plus a mirror of the
- * evidence files on the backup disk, snapshots kept for 30 days. Evidence
- * files never change and are never deleted (UPL-9), so the mirror only
- * copies new files.
+ * evidence files and uploaded species images on the backup disk, snapshots
+ * kept for 30 days. These files never change and are never deleted (UPL-9),
+ * so the mirror only copies new files.
  *
  *  - SQLite: VACUUM INTO (consistent even while the app writes)
  *  - MySQL / MariaDB: a dump written in PHP (schema and data), because
@@ -243,7 +243,7 @@ class BackupService
     private function rowCounts(): array
     {
         $counts = [];
-        foreach (['users', 'milestones', 'submissions', 'submission_images', 'submission_notes', 'audit_log', 'discord_outbox'] as $table) {
+        foreach (['users', 'species', 'milestones', 'submissions', 'submission_images', 'submission_notes', 'audit_log', 'discord_outbox'] as $table) {
             $counts[$table] = DB::table($table)->count();
         }
 
@@ -355,14 +355,18 @@ class BackupService
 
     // --- evidence mirror and retention ------------------------------------------
 
-    /** Copy evidence files that are not in the mirror yet. */
+    /**
+     * Copy evidence files and uploaded species images that are not in the
+     * mirror yet. Neither is ever changed in place: a new species image gets
+     * a new file name.
+     */
     private function mirrorEvidence(): int
     {
         $source = $this->evidence->disk();
         $target = $this->disk();
         $copied = 0;
 
-        foreach ($source->allFiles('evidence') as $path) {
+        foreach ([...$source->allFiles('evidence'), ...$source->allFiles('species')] as $path) {
             $mirror = $this->base($path);
 
             if ($target->exists($mirror)) {

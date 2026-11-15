@@ -7,7 +7,9 @@
     $title = $milestone->title();
     $claimUrl = route('submissions.create', ['milestone' => $milestone->code]);
 @endphp
-@if ($state === $P::MINE_VERIFIED)
+@if ($state === $P::DISABLED)
+    <x-milestone-disabled :milestone="$milestone" />
+@elseif ($state === $P::MINE_VERIFIED)
     <a href="{{ route('milestones.show', $milestone) }}" class="cell border-2 border-ok bg-ok/22 text-[13px] font-semibold text-ink hover:text-ink" aria-label="{{ __('dashboard.grid.aria_mine_verified', ['milestone' => $title]) }}">
         <x-icon.check />{{ __('dashboard.grid.you') }}
     </a>

@@ -38,18 +38,18 @@ it('shows cluster counters, personal stats and own submissions on the dashboard 
     $kuba = admin('Kuba');
     verifyMilestones(20);
 
-    Submission::factory()->for($joe)->onMilestone('GIGA_MELEE_250')->verified($kuba)->create();
+    Submission::factory()->for($joe)->onMilestone('THERI_MELEE_250')->verified($kuba)->create();
     Submission::factory()->for($joe)->onMilestone('THERI_FOOD_250')->rejected('Chybí screenshot předků.', $kuba)->create();
-    $pending = Submission::factory()->for($joe)->onMilestone('ALLO_OXYGEN_250')->create();
-    Submission::factory()->for(player('Kira'))->onMilestone('ALLO_OXYGEN_250')->create();
+    $pending = Submission::factory()->for($joe)->onMilestone('DEINO_OXYGEN_250')->create();
+    Submission::factory()->for(player('Kira'))->onMilestone('DEINO_OXYGEN_250')->create();
 
     $this->actingAs($joe)->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Vítejte zpět, Joe')
         ->assertSee('Jedna vaše žádost čeká na schválení.')
         ->assertSee('Jedna zamítnutá žádost čeká na opravu.')
-        ->assertSeeInOrder(['GENETIC MASTERY', '21', '/ 54'])
-        ->assertSeeInOrder(['INDO POTENTIAL', '675', '/ 1500'])
+        ->assertSeeInOrder(['GENETIC MASTERY', '21', '/ 60'])
+        ->assertSeeInOrder(['INDO POTENTIAL', '675', '/ 1650'])
         ->assertSeeInOrder(['Vaše objevy', '1', 'z 21 ověřených milníků'])
         ->assertSeeInOrder(['Žebříček', '#2'])
         ->assertSee($pending->public_id)

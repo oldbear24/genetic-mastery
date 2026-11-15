@@ -81,7 +81,7 @@ Composer lze zadat cestou: `--composer=C:/nastroje/composer.phar`.
 Všechny adresy otevřete v prohlížeči (`<D>` je `DEPLOY_TOKEN`):
 
 1. `https://<web>/ops/deploy/check/<D>` vypíše kontrolu prostředí (PHP, rozšíření, databáze, zápis do adresářů, limity, Discord). Řádky `FAIL` opravte. Před migrací je FAIL u migrací v pořádku.
-2. `https://<web>/ops/deploy/migrate/<D>` vytvoří tabulky a 54 milníků.
+2. `https://<web>/ops/deploy/migrate/<D>` vytvoří tabulky, výchozí katalog druhů a jejich milníky.
 3. Test nahrávání (ověří, že PHP smí číst nahrané soubory):
    ```sh
    curl -F "image=@screenshot.png" https://<web>/ops/deploy/upload-test/<D>
@@ -110,9 +110,9 @@ Interval co nejkratší (1 hodina, s CRON+ 5 minut). Každé spuštění pošle 
 
 ## 8. Zálohy a obnova
 
-- Zálohy leží v `genetic-mastery/storage/app/private/backups/` (databáze `db/genetic-…sql.gz` s manifestem, zrcadlo důkazů `evidence/`). Uchovávají se 30 dní.
+- Zálohy leží v `genetic-mastery/storage/app/private/backups/` (databáze `db/genetic-…sql.gz` s manifestem, zrcadlo důkazů `evidence/` a nahraných obrázků druhů `species/`). Uchovávají se 30 dní.
 - To je pořád stejný server. Pravidelně je stahujte přes FTP, nebo nastavte `BACKUP_DISK` na vzdálené úložiště (S3 kompatibilní disk potřebuje balík `league/flysystem-aws-s3-v3`).
-- **Obnova MariaDB:** soubor `genetic-…sql.gz` rozbalte a importujte přes phpMyAdmin nebo Adminer z administrace WEDOS (dump obsahuje tabulky i data). Adresář `backups/evidence/` zkopírujte zpět do `storage/app/private/evidence/`.
+- **Obnova MariaDB:** soubor `genetic-…sql.gz` rozbalte a importujte přes phpMyAdmin nebo Adminer z administrace WEDOS (dump obsahuje tabulky i data). Adresáře `backups/evidence/` a `backups/species/` zkopírujte zpět do `storage/app/private/`.
 - Triggery, které brání úpravám auditu, potřebují právo TRIGGER. Když ho databázový uživatel nemá, migrace je přeskočí, kontrola prostředí to ukáže jako WARN a audit dál chrání aplikace.
 
 ## 9. Když něco nefunguje

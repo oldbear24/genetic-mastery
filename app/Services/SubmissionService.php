@@ -122,6 +122,10 @@ class SubmissionService
     /** @throws ValidationException */
     public function ensureClaimable(User $player, Milestone $milestone): void
     {
+        if (! $milestone->isActive()) {
+            throw ValidationException::withMessages(['milestone_id' => __('submissions.form.errors.disabled')]);
+        }
+
         if (Submission::query()->verified()->where('milestone_id', $milestone->id)->exists()) {
             throw ValidationException::withMessages(['milestone_id' => __('submissions.form.errors.already_verified')]);
         }

@@ -13,18 +13,19 @@ use Illuminate\Support\Collection as BaseCollection;
  * Everything the cluster progress is made of, always computed from the data.
  * Nothing here is stored: revoking a verification changes the numbers by
  * itself (Indo Potential = base + per_milestone × V, progress = V / total).
+ * Only active milestones count (species and stat switched on by an admin).
  */
 class ClusterProgress
 {
-    /** V: number of milestones with a VERIFIED submission. */
+    /** V: number of active milestones with a VERIFIED submission. */
     public function verifiedCount(): int
     {
-        return Submission::query()->verified()->distinct()->count('milestone_id');
+        return Submission::query()->verified()->onActiveMilestone()->distinct()->count('milestone_id');
     }
 
     public function totalMilestones(): int
     {
-        return Milestone::query()->count();
+        return Milestone::query()->active()->count();
     }
 
     public function indoPotential(?int $verified = null): int
@@ -60,14 +61,16 @@ class ClusterProgress
     }
 
     /**
-     * All milestones in catalogue order with what is needed to derive their
-     * state: the verified submission with its player and a pending flag.
+     * Milestones of active species in catalogue order with what is needed to
+     * derive their state: the verified submission with its player and a
+     * pending flag. Includes switched off stats (shown as "not used").
      *
      * @return Collection<int, Milestone>
      */
     public function milestones(): Collection
     {
         return Milestone::query()
+            ->ofActiveSpecies()
             ->with(['verifiedSubmission.user'])
             ->withExists('pendingSubmissions as has_pending')
             ->orderBy('sort_order')
@@ -78,7 +81,8 @@ class ClusterProgress
      * Milestones grouped into rows by species, in config order.
      *
      * @param  Collection<int, Milestone>|null  $milestones
-     * @return BaseCollection<string, array{code: string, name: string, milestones: BaseCollection<int, Milestone>, verified: int}>
+     *                                                       `total` and `verified` count active milestones only.
+     * @return BaseCollection<string, array{code: string, name: string, image: string|null, milestones: BaseCollection<int, Milestone>, verified: int, total: int}>
      */
     public function grid(?Collection $milestones = null): BaseCollection
     {
@@ -86,12 +90,18 @@ class ClusterProgress
 
         return $milestones
             ->groupBy('dinosaur')
-            ->map(fn (BaseCollection $row, string $dinosaur) => [
-                'code' => $dinosaur,
-                'name' => config("genetic.species.{$dinosaur}", $dinosaur),
-                'milestones' => $row->values(),
-                'verified' => $row->filter(fn (Milestone $m) => $m->verifiedSubmission !== null)->count(),
-            ]);
+            ->map(function (BaseCollection $row, string $dinosaur) {
+                $active = $row->filter(fn (Milestone $m) => $m->isActive());
+
+                return [
+                    'code' => $dinosaur,
+                    'name' => $row->first()->dinosaurName(),
+                    'image' => $row->first()->species?->imageUrl(),
+                    'milestones' => $row->values(),
+                    'verified' => $active->filter(fn (Milestone $m) => $m->verifiedSubmission !== null)->count(),
+                    'total' => $active->count(),
+                ];
+            });
     }
 
     /**
@@ -103,6 +113,7 @@ class ClusterProgress
     {
         return Submission::query()
             ->verified()
+            ->onActiveMilestone()
             ->with(['milestone', 'user'])
             ->orderByDesc('reviewed_at')
             ->orderByDesc('id')
@@ -114,6 +125,7 @@ class ClusterProgress
      * Players ranked by verified discoveries. On a tie the player whose last
      * discovery was sent earlier ranks higher (LB-1). The discovery time is
      * the time the claim was sent, so a slow review does not change ranks.
+     * Discoveries on switched off milestones do not count, like in progress.
      *
      * @return BaseCollection<int, array{rank: int, user: User, discoveries: int, last_discovery_at: string}>
      */
@@ -121,6 +133,7 @@ class ClusterProgress
     {
         $rows = Submission::query()
             ->where('status', SubmissionStatus::Verified->value)
+            ->onActiveMilestone()
             ->select('user_id')
             ->selectRaw('count(*) as discoveries')
             ->selectRaw('max(submitted_at) as last_discovery_at')

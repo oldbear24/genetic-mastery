@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\SubmissionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Species;
 use App\Models\Submission;
 use App\Models\SubmissionImage;
 use App\Models\User;
@@ -106,7 +107,7 @@ class ReviewController extends Controller
             ->orderBy('id');
 
         foreach (preg_split('/\s+/', mb_strtolower($filter), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word) {
-            $species = $this->codesMatching(config('genetic.species'), $word);
+            $species = $this->codesMatching(Species::query()->pluck('name', 'code')->all(), $word);
             $stats = $this->codesMatching(config('genetic.stats'), $word);
             $like = '%'.addcslashes($word, '%_\\').'%';
 

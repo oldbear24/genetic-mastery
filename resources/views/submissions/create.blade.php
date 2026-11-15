@@ -6,13 +6,13 @@
     $claimData = [
         'species' => $selectedSpecies,
         'selected' => $selected?->id,
-        'milestones' => $grid->flatMap(fn ($row) => $row['milestones'])->mapWithKeys(fn ($m) => [$m->id => [
+        'milestones' => $grid->flatMap(fn ($row) => $row['milestones']->filter->isActive())->mapWithKeys(fn ($m) => [$m->id => [
             'code' => $m->code,
             'species' => $m->dinosaur,
             'open' => $board->claimable($m),
             'label' => __('submissions.form.claiming_value', ['species' => $m->dinosaurName(), 'stat' => $m->statName(), 'value' => $m->required_value]),
         ]]),
-        'bySpecies' => $grid->map(fn ($row) => $row['milestones']->pluck('id')->values()),
+        'bySpecies' => $grid->map(fn ($row) => $row['milestones']->filter->isActive()->pluck('id')->values()),
     ];
     $uploadConfig = [
         'maxFiles' => (int) config('genetic.upload.max_files'),
@@ -62,7 +62,7 @@
                             <input type="radio" name="species" value="{{ $code }}" x-model="species" class="peer sr-only" @checked($code === $selectedSpecies)>
                             <span class="flex min-h-16 flex-col items-start justify-center gap-0.5 rounded-xl border border-line bg-surface px-3.5 py-2.5 peer-checked:border-2 peer-checked:border-ok peer-checked:bg-ok/12 peer-focus-visible:outline-2 peer-focus-visible:outline-ok-text">
                                 <span class="font-semibold">{{ $row['name'] }}</span>
-                                <span class="text-[13px] text-ink-label">{{ __('submissions.form.species_verified', ['count' => $row['verified'], 'total' => $row['milestones']->count()]) }}</span>
+                                <span class="text-[13px] text-ink-label">{{ __('submissions.form.species_verified', ['count' => $row['verified'], 'total' => $row['total']]) }}</span>
                             </span>
                         </label>
                     @endforeach
@@ -76,7 +76,8 @@
                     <div class="flex flex-col gap-2" x-show="isSpecies('{{ $code }}')" @if ($code !== $selectedSpecies) x-cloak @endif>
                         <span class="sr-only">{{ $row['name'] }}</span>
                         <div class="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-2.5">
-                            @foreach ($row['milestones'] as $m)
+                            {{-- Switched off stats are not offered at all. --}}
+                            @foreach ($row['milestones']->filter->isActive() as $m)
                                 @php
                                     $state = $board->state($m);
                                     $open = $board->claimable($m);

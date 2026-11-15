@@ -19,8 +19,8 @@ function approveViaAdmin(Submission $claim, ?User $admin = null, bool $confirm =
 describe('revoke verification (OPR-2)', function () {
     it('lowers progress by 1 and Indo by 25, reopens superseded claims, queues the Discord edit and writes the audit', function () {
         verifyMilestones(10);
-        $winner = Submission::factory()->for(player('Kira'))->onMilestone('MEGALO_MELEE_250')->create(['submitted_at' => now()->subHours(3)]);
-        $loser = Submission::factory()->for(player('Joe'))->onMilestone('MEGALO_MELEE_250')->create(['submitted_at' => now()->subHour()]);
+        $winner = Submission::factory()->for(player('Kira'))->onMilestone('BASILISK_MELEE_250')->create(['submitted_at' => now()->subHours(3)]);
+        $loser = Submission::factory()->for(player('Joe'))->onMilestone('BASILISK_MELEE_250')->create(['submitted_at' => now()->subHour()]);
         approveViaAdmin($winner);
         // The announcement went out in the meantime (stage 6 sends it).
         DiscordOutbox::query()->update(['status' => DiscordOutbox::STATUS_SENT, 'message_id' => '999']);
@@ -31,7 +31,7 @@ describe('revoke verification (OPR-2)', function () {
 
         $lenka = admin('Lenka');
         $this->actingAs($lenka)->post(route('admin.submissions.revoke', $winner), ['revoke_reason' => 'Screenshot je upravený.'])
-            ->assertSessionHas('status', fn ($m) => str_contains($m, "Ověření žádosti {$winner->public_id} je zrušené. Progres clusteru je teď 10 / 54 a Indo Potential 400.")
+            ->assertSessionHas('status', fn ($m) => str_contains($m, "Ověření žádosti {$winner->public_id} je zrušené. Progres clusteru je teď 10 / 60 a Indo Potential 400.")
                 && str_contains($m, 'Jedna uzavřená žádost se vrátila ke schválení.'));
 
         $winner->refresh();
@@ -53,7 +53,7 @@ describe('revoke verification (OPR-2)', function () {
         $kinds = DiscordOutbox::query()->where('status', 'pending')->orderBy('id')->pluck('kind')->all();
         expect($kinds)->toBe([DiscordOutbox::KIND_REVOKED_EDIT, DiscordOutbox::KIND_REVOKED_CORRECTION])
             ->and(DiscordOutbox::query()->where('kind', DiscordOutbox::KIND_REVOKED_CORRECTION)->first()->payload)
-            ->toMatchArray(['verified' => 10, 'indo' => 400, 'total' => 54, 'indo_max' => 1500]);
+            ->toMatchArray(['verified' => 10, 'indo' => 400, 'total' => 60, 'indo_max' => 1650]);
     });
 
     it('cancels an announcement that has not been sent yet instead of editing it', function () {

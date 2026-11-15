@@ -20,7 +20,7 @@ it('has the rules from the brief as defaults', function () {
         ->and(config('genetic.upload.max_total_mb'))->toBe(60)
         ->and(config('genetic.upload.max_megapixels'))->toBe(40)
         ->and(config('genetic.allow_self_approve'))->toBeFalse()
-        ->and(config('genetic.species'))->toHaveCount(9)
+        ->and(config('genetic.species'))->toHaveCount(10)
         ->and(config('genetic.stats'))->toHaveCount(6);
 });
 

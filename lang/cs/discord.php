@@ -46,6 +46,7 @@ return [
         'milestone_link' => 'Detail: :url',
         'unknown_species' => 'Takový druh neznám.',
         'unknown_milestone' => 'Takový milník neexistuje.',
+        'milestone_disabled' => '**:milestone** se v clusteru nepoužívá.',
         'unknown_command' => 'Neznámý příkaz.',
     ],
 ];

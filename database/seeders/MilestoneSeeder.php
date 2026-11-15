@@ -2,34 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\Milestone;
+use App\Services\Catalogue;
 use Illuminate\Database\Seeder;
 
 /**
- * Creates the milestone catalogue (species × stats) from config/genetic.php.
- * Idempotent: running it again updates existing rows (matched by species
- * and stat) and never deletes anything, so submissions keep their milestone.
+ * Makes sure every species has a milestone for every stat (species × stats).
+ * Species live in the database (the migration creates the first catalogue
+ * from config/genetic.php, admins manage it on /admin/species). Idempotent:
+ * it never deletes anything and never switches a milestone on or off, so it
+ * runs on every deploy.
  */
 class MilestoneSeeder extends Seeder
 {
     public function run(): void
     {
-        $value = (int) config('genetic.required_value');
-        $order = 0;
-
-        foreach (array_keys(config('genetic.species')) as $dinosaur) {
-            foreach (array_keys(config('genetic.stats')) as $stat) {
-                $order++;
-
-                Milestone::query()->updateOrCreate(
-                    ['dinosaur' => $dinosaur, 'stat' => $stat],
-                    [
-                        'code' => Milestone::codeFor($dinosaur, $stat, $value),
-                        'required_value' => $value,
-                        'sort_order' => $order,
-                    ],
-                );
-            }
-        }
+        app(Catalogue::class)->sync();
     }
 }

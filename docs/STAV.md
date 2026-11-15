@@ -289,13 +289,59 @@ Požadavek: nasadit na WEDOS s MySQL nebo SQLite. Návod je v `docs/NASAZENI-WED
 - Rendery všech 9 druhů z Dododexu (`dododex.com/media/creature/*.png`) převedené na WebP s průhledností v `public/images/species/{kód}.webp` (např. `rex.webp`, `giga.webp`), celkem asi 220 kB.
 - Komponenta `<x-species-art>` a helper `App\Support\SpeciesImage`. Obrázek je dekorativní (prázdný `alt`), leží za obsahem a ocasem mizí přechodem do textu, nohama dolů. Druh bez souboru se zobrazí bez obrázku.
 - Mřížka milníků: obrázek ve sloupci Druh (desktop) a v hlavičce karty druhu (mobil), takže ho má i dashboard hráče. Hlavní stránka: za počítadlem GENETIC MASTERY líhnoucí se dinosaurus v inkubátoru (`public/images/genetic-mastery.webp`), za INDO POTENTIAL Indominus s Indoraptorem (`public/images/indo-potential.webp`). Oba obrázky dodal vlastník, jsou ořezané na neprůhlednou část a zmenšené.
-- `<x-counter-card image="…">` bere URL obrázku, `<x-species-art>` kód druhu (`code`) nebo URL (`src`). Varianty `species-art-row` (mřížka, obrázek dole vpravo) a `species-art-card` (počítadla, svisle na střed, slabší přechod dole).
+- `<x-counter-card image="…">` bere URL obrázku, `<x-species-art>` model druhu (`species`) nebo URL (`src`). Varianty `species-art-row` (mřížka, obrázek dole vpravo) a `species-art-card` (počítadla, svisle na střed, slabší přechod dole).
 
 **Rozhodnutí**
 
 - Soubory jsou zrcadlově otočené, aby druhy hleděly doprava (na přání vlastníka). Obrázek se vejde do rámečku celý (`object-contain`), všechny druhy mají stejnou výšku a nic se neořezává.
 - Obrázky leží u nás, ne jako odkaz na Dododex: CSP (`img-src 'self'`) zůstává beze změny a web nezávisí na cizím serveru.
 - Původní obrázky jsou herní rendery z ARK (Studio Wildcard) převzaté z Dododexu. Pro komunitní web se to běžně toleruje, licence k nim ale není.
+
+## Druhy a staty spravuje admin (15. 11. 2026)
+
+Vlastník změnil katalog: Velociraptor a Rex zůstávají, přibyl Ceratosaurus, Spinosaurus → Deinosuchus, Allosaurus → Tusoteuthis, Yutyrannus → Beelzebufo, Megalosaurus → Basilisk. Zároveň chtěl, aby katalog spravoval admin a u některých druhů šel vypnout stat (např. Oxygen).
+
+**Hotovo**
+
+- Tabulka `species` (kód, název, pořadí, `is_active`) a sloupec `milestones.is_active` (stat zapnutý u druhu). Migrace `2026_11_15_000100_create_species_table` založí výchozí katalog z `config/genetic.php` (10 druhů v pořadí Rex, Raptor, Giganotosaurus, Carnotaurus, Ceratosaurus, Therizinosaurus, Deinosuchus, Tusoteuthis, Beelzebufo, Basilisk). Druhy, které už v databázi mají milníky, ale v konfiguraci nejsou (Spinosaurus, Allosaurus, Yutyrannus, Megalosaurus), vloží jako vypnuté.
+- `App\Services\Catalogue`: `sync()` (seeder při každém nasazení: dotvoří chybějící milníky, srovná pořadí a kódy, nic nemaže a nikdy nepřepne zapnuto/vypnuto), `create()`, `update()` (název, aktivní, zapnuté staty), `move()`. Každá změna je jedna transakce se záznamem v audit logu (`species.created`, `species.updated`, `species.moved`, jen změněné hodnoty).
+- Stránka `/admin/species` („Druhy a staty“ v admin menu): název, aktivní, šest zaškrtávátek statů, posun nahoru/dolů, počet ověřených a čekajících žádostí u druhu a formulář pro nový druh. Aktivní druh musí mít aspoň jeden stat.
+- Počítá se jen aktivní milník (stat zapnutý a druh aktivní): progres, celkový počet, Indo Potential i jeho maximum, žebříček a poslední objevy. Výchozí katalog: 60 milníků, INDO POTENTIAL nejvýš 1650.
+- Vypnutý stat ukazuje mřížka jako „— Nepoužívá se“ (veřejná i Můj přehled), formulář žádosti ho nenabízí, server žádost odmítne a schválení čekající žádosti na vypnutém milníku admin nedostane (zamítnout jde). Detail vypnutého milníku zůstává dostupný s upozorněním. Vypnutý druh z mřížky zmizí.
+- Discord: nabídka druhů v `/genetic` se bere z aktivních druhů (nejvýš 25). `CommandSync` v plánovači pozná změnu definice podle hashe a příkaz znovu zaregistruje, po chybě čeká 15 minut. `discord:register-commands` hash uloží taky. `/genetic milestone` u vypnutého milníku odpoví, že se nepoužívá, `/genetic progress <druh>` vypnuté staty vynechá.
+- Obrázky nových druhů z Dododexu (`cerato`, `deino`, `tuso`, `beelze`, `basilisk`), otočené doprava. Obrázky původních druhů zůstávají pro případ, že je admin znovu zapne.
+- Zálohy: tabulka `species` je v manifestu počtů řádků. Kontrola nasazení (`/ops/deploy/check`) chce aspoň jeden aktivní milník místo přesně 54.
+- Testy: nový `Admin/SpeciesTest` (vypnutí statu i druhu a zpětné zapnutí, odmítnutí žádosti a schválení, přidání druhu, validace kódu, přejmenování, pořadí, audit, registrace Discord příkazů a čekání po chybě), migrace s původními druhy, Discord odpověď u vypnutého milníku. Existující testy přepočítané na 60 a 1650.
+
+**Rozhodnutí**
+
+- Druhy jsou v databázi, staty zůstávají v konfiguraci (šest pevných sloupců mřížky). `config('genetic.species')` je jen výchozí katalog pro migraci, pozdější úpravy konfigurace existující instalaci nemění.
+- Nic se nemaže. Vypnutý druh nebo stat drží žádosti i důkazy a po zapnutí se zase počítají. Kód druhu je trvalý (je v kódech milníků a URL), měnit jde jen název.
+- Žebříček a poslední objevy počítají jen aktivní milníky, stejně jako progres. Objevitel vypnutého druhu tak o objev v žebříčku přijde, dokud admin druh nezapne.
+- Maximum Indo Potential se počítá z aktivních milníků (150 + 25 × počet), takže se po změně katalogu mění (60 milníků = 1650). Pokud má zůstat pevných 1500, je potřeba upravit `INDO_BASE` nebo `INDO_PER_MILESTONE`.
+- Výchozí vypnuté staty se nehádají. Dododex staty v HTML neukazuje, takže všechny druhy začínají se všemi šesti a admin vypne, co ve hře nejde (pravděpodobně Oxygen u Tusoteuthise).
+- Názvy zůstávají herní („Rex“, „Raptor“), přestože vlastník psal „Tyrannosaurus rex“ a „Velociraptor“. Změnit jde v administraci.
+
+## Obrázek druhu nahrává admin (15. 11. 2026)
+
+Vlastník chtěl, aby admin mohl k novému druhu přidat obrázek.
+
+**Hotovo**
+
+- Na `/admin/species` jde obrázek nahrát při přidání druhu i později u každého druhu, nahradit ho a nahraný obrázek odebrat. Zaškrtávátko „Otočit vodorovně“ obrázek zrcadlí, aby zvíře koukalo doprava jako ostatní.
+- `App\Services\SpeciesArt`: stejné kontroly jako u důkazů (`EvidenceProcessor::inspect()`: typ podle obsahu, 15 MB, 40 Mpx), zmenšení na nejvýš 400 px (jako dodané obrázky), převod na WEBP přes GD s průhledností a bez metadat. Soubor leží na disku důkazů jako `species/{KÓD}/{16 hex}.webp`, cesta je ve sloupci `species.image`.
+- Veřejná adresa `/species-art/{kód}/{verze}` (`SpeciesArtController`): verze je náhodná část jména souboru, takže se s každým nahráním změní a prohlížeč může obrázek cachovat napořád (`immutable`). Stará adresa po výměně vrací 404. Hlavičky jako u důkazů (`nosniff`, CSP se `sandbox`).
+- Pořadí zdrojů (`SpeciesImage::for()`): nahraný obrázek, jinak dodaný `public/images/species/{kód}.webp`, jinak nic. `<x-species-art>` bere model druhu (`species`) nebo URL (`src`), mřížka dostává URL v řádku z `ClusterProgress::grid()`.
+- Audit: změna obrázku je v `species.created` a `species.updated` jako „obrázek: nahraný soubor ….webp“.
+- Zálohy zrcadlí kromě `evidence/` i `species/`. Obnova tedy kopíruje zpět obě složky.
+- Testy: zmenšení a průhlednost (pixely), otočení, veřejné vydání s hlavičkami, výměna a odebrání s návratem k dodanému obrázku, odmítnutí PHP souboru jako .png, GIF a obrázku nad 40 Mpx beze změny druhu, nový druh s obrázkem, úklid souboru při chybě uložení, 404, zrcadlení v záloze.
+
+**Rozhodnutí**
+
+- Soubory jdou na disk důkazů (`storage/app/private`), ne do `public/`: v Dockeru přežijí nové nasazení (volume `storage`) a na WEDOS není potřeba symlink `storage:link`.
+- Nahrazený obrázek se nemaže, odkazuje na něj audit log. Je to pár desítek kB.
+- Obrázek se jen zmenší a zrcadlí, neořezává se. Nejlépe vypadá PNG nebo WEBP s průhledným pozadím, u fotky s pozadím je vidět obdélník (přechod do textu ho jen zjemní).
+- Sloupec `species.image` je přímo v migraci `create_species_table`, protože ta ještě nebyla nasazená.
 
 ## Co zůstává otevřené
 

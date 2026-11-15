@@ -55,8 +55,8 @@ class EnvironmentCheck
             $add($pending === [] ? self::OK : self::FAIL, 'migrations', $pending === [] ? 'all ran' : count($pending).' pending: run /ops/deploy/migrate');
 
             if ($pending === []) {
-                $count = Milestone::query()->count();
-                $add($count === 54 ? self::OK : self::FAIL, 'milestone catalogue', "{$count} milestones");
+                $count = Milestone::query()->active()->count();
+                $add($count > 0 ? self::OK : self::FAIL, 'milestone catalogue', "{$count} active milestones");
             }
 
             if ($driver === 'sqlite') {

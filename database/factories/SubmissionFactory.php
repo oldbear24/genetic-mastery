@@ -16,7 +16,7 @@ class SubmissionFactory extends Factory
     public function definition(): array
     {
         return [
-            'milestone_id' => fn () => Milestone::query()->inRandomOrder()->value('id') ?? Milestone::factory(),
+            'milestone_id' => fn () => Milestone::query()->active()->without('species')->inRandomOrder()->value('id') ?? Milestone::factory(),
             'user_id' => User::factory(),
             'player_name_snapshot' => fn (array $attributes) => User::find($attributes['user_id'])?->display_name ?? 'player',
             'status' => SubmissionStatus::Pending,
@@ -27,7 +27,7 @@ class SubmissionFactory extends Factory
 
     public function onMilestone(string $code): static
     {
-        return $this->state(fn () => ['milestone_id' => Milestone::where('code', $code)->value('id')]);
+        return $this->state(fn () => ['milestone_id' => Milestone::query()->without('species')->where('code', $code)->value('id')]);
     }
 
     public function verified(?User $reviewer = null): static

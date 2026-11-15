@@ -4,6 +4,7 @@ namespace App\Services\Discord;
 
 use App\Enums\MilestoneState;
 use App\Models\Milestone;
+use App\Models\Species;
 use App\Services\ClusterProgress;
 
 /**
@@ -17,10 +18,16 @@ class GeneticCommands
 
     public function __construct(private readonly ClusterProgress $progress) {}
 
-    /** @return list<array<string, mixed>> */
+    /**
+     * Species choices come from the active catalogue (Discord allows at most
+     * 25 choices). CommandSync re-registers the command when they change.
+     *
+     * @return list<array<string, mixed>>
+     */
     public function definitions(): array
     {
-        $species = collect(config('genetic.species'))->map(fn (string $name, string $code) => ['name' => $name, 'value' => $code])->values()->all();
+        $species = Species::query()->active()->ordered()->limit(25)->get()
+            ->map(fn (Species $s) => ['name' => $s->name, 'value' => $s->code])->values()->all();
         $stats = collect(config('genetic.stats'))->map(fn (string $name, string $code) => ['name' => $name, 'value' => $code])->values()->all();
 
         return [[
@@ -89,7 +96,7 @@ class GeneticCommands
             $s = $this->progress->summary();
             $lines = [__('discord.reply.progress_title', ['verified' => $s['verified'], 'total' => $s['total']])];
             foreach ($grid as $row) {
-                $lines[] = __('discord.reply.progress_row', ['species' => $row['name'], 'count' => $row['verified'], 'total' => $row['milestones']->count()]);
+                $lines[] = __('discord.reply.progress_row', ['species' => $row['name'], 'count' => $row['verified'], 'total' => $row['total']]);
             }
 
             return $this->reply(implode("\n", $lines));
@@ -101,8 +108,8 @@ class GeneticCommands
             return $this->reply(__('discord.reply.unknown_species'), true);
         }
 
-        $lines = [__('discord.reply.species_title', ['species' => $row['name'], 'count' => $row['verified'], 'total' => $row['milestones']->count()])];
-        foreach ($row['milestones'] as $milestone) {
+        $lines = [__('discord.reply.species_title', ['species' => $row['name'], 'count' => $row['verified'], 'total' => $row['total']])];
+        foreach ($row['milestones']->filter->isActive() as $milestone) {
             $lines[] = $this->statLine($milestone);
         }
 
@@ -147,6 +154,10 @@ class GeneticCommands
 
         if ($milestone === null) {
             return $this->reply(__('discord.reply.unknown_milestone'), true);
+        }
+
+        if (! $milestone->isActive()) {
+            return $this->reply(__('discord.reply.milestone_disabled', ['milestone' => $milestone->title()]), true);
         }
 
         $params = ['milestone' => $milestone->title(), 'code' => $milestone->code];

@@ -1,17 +1,18 @@
 <?php
 
+use App\Models\Species;
 use App\Models\Submission;
 use App\Support\SpeciesImage;
 
-it('is public and shows the 9 × 6 grid in Czech', function () {
+it('is public and shows the 10 × 6 grid in Czech', function () {
     $response = $this->get('/')->assertOk();
 
     $response->assertSee('lang="cs"', false)
         ->assertSee('Milníky')
-        ->assertSee('9 druhů × 6 statů · každý potřebuje 250 bodů')
+        ->assertSee('10 druhů × 6 statů · každý potřebuje 250 bodů')
         ->assertSee('Přihlásit přes Discord');
 
-    foreach (config('genetic.species') as $name) {
+    foreach (Species::query()->pluck('name') as $name) {
         $response->assertSee($name);
     }
     foreach (config('genetic.stats') as $name) {
@@ -62,7 +63,7 @@ it('lists the last 5 verified milestones, newest first (HP-5)', function () {
 it('formats the percentage the Czech way', function () {
     verifyMilestones(23);
 
-    $this->get('/')->assertSee('ověřených milníků v celém clusteru · 42,6 %');
+    $this->get('/')->assertSee('ověřených milníků v celém clusteru · 38,3 %');
 });
 
 it('renders the milestone detail of a verified milestone publicly', function () {
@@ -82,7 +83,7 @@ it('returns 404 for an unknown milestone code', function () {
 
 it('has a species image for every configured species', function () {
     foreach (array_keys(config('genetic.species')) as $code) {
-        expect(SpeciesImage::url($code))->not->toBeNull('Missing public/images/species/'.strtolower($code).'.webp');
+        expect(SpeciesImage::bundled($code))->not->toBeNull('Missing public/images/species/'.strtolower($code).'.webp');
     }
 });
 
@@ -90,7 +91,7 @@ it('shows species images in the grid and behind the counters', function () {
     $response = $this->get('/')->assertOk();
 
     foreach (array_keys(config('genetic.species')) as $code) {
-        $response->assertSee(SpeciesImage::url($code), false);
+        $response->assertSee(SpeciesImage::bundled($code), false);
     }
 
     foreach (['genetic-mastery', 'indo-potential'] as $image) {
@@ -100,7 +101,8 @@ it('shows species images in the grid and behind the counters', function () {
 });
 
 it('renders a species without an image file without the image', function () {
-    expect(SpeciesImage::url('NOPE'))->toBeNull();
+    expect(SpeciesImage::bundled('NOPE'))->toBeNull();
 
-    $this->blade('<x-species-art code="NOPE" />')->assertDontSee('<img', false);
+    $species = new Species(['code' => 'NOPE', 'name' => 'Nope']);
+    $this->blade('<x-species-art :species="$species" />', ['species' => $species])->assertDontSee('<img', false);
 });

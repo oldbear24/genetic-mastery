@@ -5,9 +5,9 @@
 | Genetic Mastery rules
 |--------------------------------------------------------------------------
 |
-| Species, stats and the required value are the source for the milestone
-| seed. Codes are stable identifiers (they end up in milestone codes such
-| as GIGA_MELEE_250), names are shown in the UI exactly as the game shows
+| Stats and the required value define the milestones of every species.
+| Codes are stable identifiers (they end up in milestone codes such as
+| GIGA_MELEE_250), names are shown in the UI exactly as the game shows
 | them, so they are not translated.
 |
 */
@@ -17,16 +17,23 @@ return [
     // Shown under the logo as "<name> · ARK cluster"; without it just "ARK cluster".
     'cluster_name' => env('CLUSTER_NAME'),
 
+    /*
+    | The initial species catalogue, used once by the migration that creates
+    | the species table. After that admins manage species on /admin/species
+    | (add, rename, reorder, switch off a species or single stats), so later
+    | edits here do not change an existing installation.
+    */
     'species' => [
         'REX' => 'Rex',
         'RAPTOR' => 'Raptor',
-        'CARNO' => 'Carnotaurus',
         'GIGA' => 'Giganotosaurus',
+        'CARNO' => 'Carnotaurus',
+        'CERATO' => 'Ceratosaurus',
         'THERI' => 'Therizinosaurus',
-        'SPINO' => 'Spinosaurus',
-        'ALLO' => 'Allosaurus',
-        'YUTY' => 'Yutyrannus',
-        'MEGALO' => 'Megalosaurus',
+        'DEINO' => 'Deinosuchus',
+        'TUSO' => 'Tusoteuthis',
+        'BEELZE' => 'Beelzebufo',
+        'BASILISK' => 'Basilisk',
     ],
 
     'stats' => [

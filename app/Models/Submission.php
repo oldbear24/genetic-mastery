@@ -130,6 +130,12 @@ class Submission extends Model
         $query->where('status', SubmissionStatus::Pending->value);
     }
 
+    /** Only claims on milestones that count (species and stat switched on). @param Builder<Submission> $query */
+    public function scopeOnActiveMilestone(Builder $query): void
+    {
+        $query->whereHas('milestone', fn (Builder $milestone) => $milestone->active());
+    }
+
     public function hasStatus(SubmissionStatus ...$statuses): bool
     {
         return in_array($this->status, $statuses, true);

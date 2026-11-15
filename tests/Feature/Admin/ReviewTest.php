@@ -48,8 +48,8 @@ describe('access', function () {
 
 describe('queue and detail', function () {
     it('lists pending claims oldest first and filters by species, stat and player (ADM-1)', function () {
-        $old = pendingClaim('ALLO_OXYGEN_250', player('Ondra'), ['submitted_at' => now()->subDays(2)]);
-        $mid = pendingClaim('YUTY_MELEE_250', player('Eva'), ['submitted_at' => now()->subDay()]);
+        $old = pendingClaim('DEINO_OXYGEN_250', player('Ondra'), ['submitted_at' => now()->subDays(2)]);
+        $mid = pendingClaim('BEELZE_MELEE_250', player('Eva'), ['submitted_at' => now()->subDay()]);
         $new = pendingClaim('REX_MELEE_250', player('Kira'), ['submitted_at' => now()->subHour()]);
         Submission::factory()->onMilestone('GIGA_HEALTH_250')->verified()->create();
 
@@ -58,7 +58,7 @@ describe('queue and detail', function () {
             ->assertSeeInOrder([$old->public_id, $mid->public_id, $new->public_id])
             ->assertSee('Žádosti ke schválení');
 
-        $this->actingAs(admin('A2'))->get(route('admin.queue', ['q' => 'yuty']))
+        $this->actingAs(admin('A2'))->get(route('admin.queue', ['q' => 'beelze']))
             ->assertSee($mid->public_id)->assertDontSee($old->public_id)->assertDontSee($new->public_id);
         $this->actingAs(admin('A3'))->get(route('admin.queue', ['q' => 'melee']))
             ->assertSee($mid->public_id)->assertSee($new->public_id)->assertDontSee($old->public_id);
@@ -137,7 +137,7 @@ describe('approve', function () {
         $this->actingAs($kuba)
             ->post(route('admin.submissions.approve', $claim), ['public_note' => 'Ověřeno podle záznamu mutací.'])
             ->assertRedirect(route('admin.queue'))
-            ->assertSessionHas('status', fn ($message) => str_contains($message, 'Schváleno · REX_MELEE_250 je ověřený. Progres clusteru je teď 1 / 54 a Indo Potential 175 / 1500. Objevitel: Kira.')
+            ->assertSessionHas('status', fn ($message) => str_contains($message, 'Schváleno · REX_MELEE_250 je ověřený. Progres clusteru je teď 1 / 60 a Indo Potential 175 / 1650. Objevitel: Kira.')
                 && str_contains($message, 'Jedna další žádost byla uzavřena.'));
 
         $claim->refresh();
@@ -165,7 +165,7 @@ describe('approve', function () {
         expect($outbox->kind)->toBe(DiscordOutbox::KIND_VERIFIED)
             ->and($outbox->status)->toBe('pending')
             ->and($outbox->submission_id)->toBe($claim->id)
-            ->and($outbox->payload)->toMatchArray(['verified' => 1, 'total' => 54, 'indo' => 175, 'indo_max' => 1500]);
+            ->and($outbox->payload)->toMatchArray(['verified' => 1, 'total' => 60, 'indo' => 175, 'indo_max' => 1650]);
 
         Http::assertNothingSent();
     });

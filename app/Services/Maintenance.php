@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Services\Discord\CommandSync;
 use App\Services\Discord\OutboxSender;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use Throwable;
  * which shared hosting such as WEDOS disables):
  *
  *  - send the Discord outbox (every tick),
+ *  - re-register /genetic when the species catalogue changed,
  *  - back up when the newest snapshot is older than BACKUP_EVERY_HOURS,
  *  - run the restore test when the last one is older than 7 days.
  *
@@ -27,6 +29,7 @@ class Maintenance
     public function __construct(
         private readonly OutboxSender $outbox,
         private readonly BackupService $backups,
+        private readonly CommandSync $commands,
     ) {}
 
     /** @return array<string, mixed> */
@@ -39,7 +42,10 @@ class Maintenance
         }
 
         try {
-            $report = ['outbox' => $this->attempt('outbox', fn () => $this->outbox->run(50))];
+            $report = [
+                'outbox' => $this->attempt('outbox', fn () => $this->outbox->run(50)),
+                'discord_commands' => $this->attempt('discord_commands', fn () => $this->commands->run()),
+            ];
 
             if ($this->backupDue()) {
                 $report['backup'] = $this->attempt('backup', fn () => $this->backups->run());

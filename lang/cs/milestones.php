@@ -15,6 +15,8 @@ return [
         'aria_verified' => ':milestone: ověřeno, objevitel :name',
         'aria_pending' => ':milestone: čeká na schválení',
         'aria_locked' => ':milestone: zamčeno',
+        'disabled' => 'Nepoužívá se',
+        'aria_disabled' => ':milestone: v clusteru se nepoužívá',
     ],
 
     'grid' => [
@@ -50,6 +52,7 @@ return [
 
     'detail' => [
         'required' => ':code · požadovaná hodnota :value',
+        'disabled_notice' => 'Tento milník se v clusteru nepoužívá (admin vypnul druh nebo stat). Nepočítá se do progresu a nejde na něj poslat žádost. Dřívější žádosti a důkazy zůstávají.',
         'verified_banner' => 'OVĚŘENO – objevitel :name',
         'verified_counts' => 'Započítáno clusteru: +1 do progresu, +:indo Indo Potential',
         'pending_banner' => 'Čeká na schválení',

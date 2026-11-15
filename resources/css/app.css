@@ -144,6 +144,10 @@
     @apply w-full rounded-lg border border-line bg-sunken px-3.5 py-2.5 text-ink placeholder:text-ink-3 focus:border-ok focus:outline-none;
 }
 
+@utility field-file {
+    @apply w-full text-sm text-ink-2 file:mr-3 file:min-h-10 file:cursor-pointer file:rounded-lg file:border file:border-solid file:border-line file:bg-transparent file:px-3.5 file:font-medium file:text-ink hover:file:border-ink-3;
+}
+
 @utility badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-[0.06em] uppercase whitespace-nowrap;
 }
@@ -179,6 +183,10 @@
 
 @utility cell-locked {
     @apply cell border border-line-head bg-sunken text-ink-3 hover:border-line hover:text-ink-2;
+}
+
+@utility cell-disabled {
+    @apply cell border border-dashed border-line-soft text-ink-3/70;
 }
 
 @utility cell-rejected {

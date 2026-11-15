@@ -1,7 +1,10 @@
 # Genetic Mastery
 
-Web application that tracks the 54 genetic milestones of an ARK cluster
-(9 species × 6 stats, value 250). Players submit claims with screenshots,
+Web application that tracks the genetic milestones of an ARK cluster
+(species × 6 stats, value 250; admins manage the species, their images and
+single switched off stats on `/admin/species`, the default catalogue has
+10 species).
+Players submit claims with screenshots,
 admins verify them by hand, and the site computes the shared cluster progress
 and the Indo Potential. New milestones are announced on Discord, and the
 `/genetic` slash command answers in the server.
@@ -37,7 +40,7 @@ php artisan serve
 Without a Discord application you can still try everything locally:
 
 ```sh
-php artisan db:seed --class=DemoSeeder   # sample data from the design (23 of 54)
+php artisan db:seed --class=DemoSeeder   # sample data in the layout of the design
 php artisan dev:login Joe                # player
 php artisan dev:login Kuba               # admin
 ```
@@ -73,7 +76,9 @@ MariaDB 10.11 and checks the code style with Pint (`.github/workflows/ci.yml`).
 3. Invite the bot to the server. In the announcement channel it needs View
    Channel, Send Messages and Embed Links. No privileged intents.
 4. Interactions Endpoint URL: `https://<your-site>/discord/interactions`.
-5. `php artisan discord:register-commands`.
+5. The scheduler registers `/genetic` by itself within a minute and again
+   whenever the species catalogue changes. `php artisan discord:register-commands`
+   does it right away.
 
 ## Docker
 
@@ -152,7 +157,8 @@ Hosts without SSH and with a URL-only cron are supported; the Czech guide is
 `php artisan backup:run` writes a consistent database snapshot
 (`VACUUM INTO` for SQLite, a dump written in PHP for MySQL / MariaDB, so no
 `mysqldump` is needed, `pg_dump` for PostgreSQL) and mirrors the evidence
-files to `BACKUP_DISK` under `BACKUP_PATH`, keeping snapshots for 30 days.
+files and uploaded species images to `BACKUP_DISK` under `BACKUP_PATH`,
+keeping snapshots for 30 days.
 Use an off-site disk in production (S3 compatible storage needs
 `league/flysystem-aws-s3-v3`, or mount a remote volume).
 
@@ -167,5 +173,6 @@ Restore by hand:
 2. `gunzip -c backups/db/genetic-YYYYMMDD-HHMMSS.sqlite.gz > storage/database/database.sqlite`
    (MySQL / MariaDB: import `genetic-….sql.gz` with the mysql client, phpMyAdmin
    or Adminer; PostgreSQL: `pg_restore --clean --dbname=… genetic-….pgdump`).
-3. Copy `backups/evidence/` back to `storage/app/private/evidence/`.
+3. Copy `backups/evidence/` and `backups/species/` (uploaded species images)
+   back to `storage/app/private/`.
 4. Start the app again.

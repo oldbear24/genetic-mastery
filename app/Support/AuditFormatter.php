@@ -40,7 +40,10 @@ class AuditFormatter
             'status' => SubmissionStatus::tryFrom((string) $value)?->label() ?? (string) $value,
             'reviewed_by', 'revoked_by' => $this->users->get((int) $value)?->display_name ?? '#'.$value,
             'visibility' => __("audit.visibility.{$value}"),
-            default => (string) $value,
+            'is_active' => $value ? __('audit.yes') : __('audit.no'),
+            'stats' => $value === [] ? __('audit.no_stats') : implode(', ', array_map(fn ($stat) => config("genetic.stats.{$stat}", $stat), (array) $value)),
+            'image' => __('audit.image_file', ['file' => basename((string) $value)]),
+            default => is_array($value) ? implode(', ', $value) : (string) $value,
         };
     }
 }

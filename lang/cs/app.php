@@ -18,6 +18,7 @@ return [
         'review_queue' => 'Ke schválení',
         'all_submissions' => 'Všechny žádosti',
         'audit_log' => 'Historie změn',
+        'species' => 'Druhy a staty',
         'sign_in' => 'Přihlásit přes Discord',
         'sign_out' => 'Odhlásit',
         'menu' => 'Menu',

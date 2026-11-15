@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Species;
 use App\Models\Submission;
 use App\Models\SubmissionImage;
 use Illuminate\Support\Facades\Log;
@@ -77,14 +78,16 @@ it('gives players 403 on every admin address (acceptance)', function () {
     expect($adminRoutes->count())->toBeGreaterThanOrEqual(9);
 
     foreach ($adminRoutes as $route) {
-        $uri = '/'.str_replace('{submission}', $claim->public_id, $route->uri());
-        $method = in_array('POST', $route->methods(), true) ? 'post' : 'get';
+        $uri = '/'.str_replace(['{submission}', '{species}'], [$claim->public_id, 'REX'], $route->uri());
+        $method = strtolower(collect($route->methods())->first(fn (string $m) => $m !== 'HEAD'));
 
-        $this->actingAs($player)->{$method}($uri, ['reason' => 'x', 'revoke_reason' => 'x', 'body' => 'x', 'visibility' => 'public'])
+        $this->actingAs($player)->{$method}($uri, ['reason' => 'x', 'revoke_reason' => 'x', 'body' => 'x', 'visibility' => 'public', 'code' => 'HACK', 'name' => 'x', 'direction' => 'up'])
             ->assertForbidden();
     }
 
-    expect($claim->fresh()->status->value)->toBe('verified');
+    expect($claim->fresh()->status->value)->toBe('verified')
+        ->and(Species::query()->where('code', 'HACK')->exists())->toBeFalse()
+        ->and(Species::query()->where('code', 'REX')->value('name'))->toBe('Rex');
 });
 
 it('escapes player and admin text everywhere (SEC-3)', function () {

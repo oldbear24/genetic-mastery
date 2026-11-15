@@ -9,6 +9,10 @@
         <span class="font-mono text-sm text-ok-text">{{ __('milestones.detail.required', ['code' => $milestone->code, 'value' => $milestone->required_value]) }}</span>
         <h1 class="m-0 font-display text-[32px] leading-[1.1] font-semibold sm:text-[40px]">{{ $milestone->title() }}</h1>
 
+        @unless ($milestone->isActive())
+            <p class="alert-warning m-0" role="note">{{ __('milestones.detail.disabled_notice') }}</p>
+        @endunless
+
         @if ($state === \App\Enums\MilestoneState::Verified)
             <div class="flex flex-wrap items-center gap-3.5 rounded-[14px] border border-ok/55 bg-ok/12 px-5 py-4">
                 <x-icon.check :size="26" />

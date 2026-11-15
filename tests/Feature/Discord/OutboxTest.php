@@ -15,7 +15,7 @@ function messagesUrl(): string
 }
 
 /** Approve a claim as an admin through the real endpoint; returns the claim. */
-function approvedClaim(string $code = 'GIGA_MELEE_250', string $player = 'Joe', string $discordId = '330915472668606464'): Submission
+function approvedClaim(string $code = 'THERI_MELEE_250', string $player = 'Joe', string $discordId = '330915472668606464'): Submission
 {
     $claim = Submission::factory()->for(User::factory()->named($player)->create(['discord_id' => $discordId]))->onMilestone($code)->create();
     test()->actingAs(admin('Kuba'.uniqid()))->post(route('admin.submissions.approve', $claim))->assertSessionHas('status');
@@ -46,14 +46,14 @@ it('announces a verified milestone with an embed and pings only the discoverer (
             && $request->hasHeader('Authorization', 'Bot test-bot-token')
             && $request['content'] === 'Gratulace, <@330915472668606464>! Nový ověřený milník.'
             && $embed['title'] === 'NOVÝ GENETICKÝ MILNÍK'
-            && $embed['url'] === route('milestones.show', 'GIGA_MELEE_250')
+            && $embed['url'] === route('milestones.show', 'THERI_MELEE_250')
             && $fields->all() === [
-                'Druh' => 'Giganotosaurus',
+                'Druh' => 'Therizinosaurus',
                 'Stat' => 'Melee Damage',
                 'Hodnota' => '250',
                 'Objevitel' => 'Joe',
-                'Progres' => '23 / 54',
-                'Indo Potential' => '725 / 1500',
+                'Progres' => '23 / 60',
+                'Indo Potential' => '725 / 1650',
             ]
             && $request['allowed_mentions'] === ['parse' => [], 'users' => ['330915472668606464']]
             && str_starts_with($request['nonce'], 'gm-outbox-')
@@ -66,7 +66,7 @@ it('announces a verified milestone with an embed and pings only the discoverer (
         ->and($row->sent_at)->not->toBeNull()
         ->and($claim->fresh()->discord_message_id)->toBe('111222333444555666');
 
-    $this->get(route('milestones.show', 'GIGA_MELEE_250'))->assertSee('oznámeno na Discordu');
+    $this->get(route('milestones.show', 'THERI_MELEE_250'))->assertSee('oznámeno na Discordu');
 });
 
 it('sends the announcement after a Discord outage, exactly once (acceptance)', function () {
@@ -165,12 +165,12 @@ it('edits the original message and posts a correction after a revocation (DC-3)'
 
     Http::assertSent(fn (Request $r) => $r->method() === 'PATCH'
         && $r->url() === messagesUrl().'/555000000000000001'
-        && $r['content'] === '**OVĚŘENÍ ZRUŠENO** ~~NOVÝ GENETICKÝ MILNÍK · Giganotosaurus · Melee Damage~~'
+        && $r['content'] === '**OVĚŘENÍ ZRUŠENO** ~~NOVÝ GENETICKÝ MILNÍK · Therizinosaurus · Melee Damage~~'
         && $r['embeds'] === []
         && $r['allowed_mentions'] === ['parse' => []]);
 
     Http::assertSent(fn (Request $r) => $r->method() === 'POST'
-        && str_contains((string) $r['content'], '**Oprava:** Ověření milníku Giganotosaurus · Melee Damage bylo zrušeno. Progres je teď 22 / 54, Indo Potential 700 / 1500.')
+        && str_contains((string) $r['content'], '**Oprava:** Ověření milníku Therizinosaurus · Melee Damage bylo zrušeno. Progres je teď 22 / 60, Indo Potential 700 / 1650.')
         && $r['message_reference']['message_id'] === '555000000000000001'
         && $r['allowed_mentions'] === ['parse' => []]);
 

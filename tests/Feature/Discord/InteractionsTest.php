@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Milestone;
 use App\Models\Submission;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -66,7 +67,7 @@ it('does not need a CSRF token or start a session', function () {
     expect($response->headers->getCookies())->toBeEmpty();
 });
 
-it('answers /genetic overview with V / 54 and 150 + 25 × V, within 1 s (acceptance)', function (int $verified, int $indo) {
+it('answers /genetic overview with V / total and 150 + 25 × V, within 1 s (acceptance)', function (int $verified, int $indo) {
     verifyMilestones($verified);
 
     $start = microtime(true);
@@ -77,14 +78,14 @@ it('answers /genetic overview with V / 54 and 150 + 25 × V, within 1 s (accepta
     expect($response->json('type'))->toBe(4)
         ->and($response->json('data.flags'))->toBeNull()
         ->and($response->json('data.allowed_mentions'))->toBe(['parse' => []])
-        ->and($content)->toContain(sprintf('GENETIC MASTERY   %d / 54', $verified))
-        ->and($content)->toContain(sprintf('INDO POTENTIAL    %d / 1500', $indo))
+        ->and($content)->toContain(sprintf('GENETIC MASTERY   %d / 60', $verified))
+        ->and($content)->toContain(sprintf('INDO POTENTIAL    %d / 1650', $indo))
         ->and($content)->toContain('/genetic progress [druh]')
         ->and($elapsed)->toBeLessThan(1.0);
-})->with([[0, 150], [23, 725], [54, 1500]]);
+})->with([[0, 150], [23, 725], [60, 1650]]);
 
 it('draws a text progress bar', function () {
-    verifyMilestones(27);
+    verifyMilestones(30);
 
     expect(interaction(command('overview'))->json('data.content'))->toContain(str_repeat('█', 10).str_repeat('░', 10).' 50 %');
 });
@@ -94,9 +95,9 @@ it('answers /genetic progress per species, and the six stats of one species', fu
     Submission::factory()->onMilestone('REX_STAMINA_250')->create();
 
     expect(interaction(command('progress'))->json('data.content'))
-        ->toContain('**Progres po druzích** (1 / 54)')
+        ->toContain('**Progres po druzích** (1 / 60)')
         ->toContain('Rex 1 / 6')
-        ->toContain('Megalosaurus 0 / 6');
+        ->toContain('Basilisk 0 / 6');
 
     expect(interaction(command('progress', ['druh' => 'REX']))->json('data.content'))
         ->toContain('**Rex** · 1 / 6 ověřeno')
@@ -154,7 +155,18 @@ it('registers /genetic as a guild command with Czech descriptions', function () 
             && $command['name'] === 'genetic'
             && collect($command['options'])->pluck('name')->all() === ['overview', 'progress', 'leaderboard', 'milestone']
             && $command['options'][0]['description'] === 'Progres clusteru a Indo Potential'
-            && count($command['options'][3]['options'][0]['choices']) === 9
+            && count($command['options'][3]['options'][0]['choices']) === 10
             && count($command['options'][3]['options'][1]['choices']) === 6;
     });
+});
+
+it('says that a switched off milestone is not used', function () {
+    Milestone::query()->where('code', 'TUSO_OXYGEN_250')->update(['is_active' => false]);
+
+    expect(interaction(command('milestone', ['druh' => 'TUSO', 'stat' => 'OXYGEN']))->json('data.content'))
+        ->toBe('**Tusoteuthis · Oxygen** se v clusteru nepoužívá.');
+
+    expect(interaction(command('progress', ['druh' => 'TUSO']))->json('data.content'))
+        ->toContain('**Tusoteuthis** · 0 / 5 ověřeno')
+        ->not->toContain('Oxygen');
 });

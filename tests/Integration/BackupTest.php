@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Species;
 use App\Models\Submission;
 use App\Models\SubmissionImage;
 use App\Services\BackupService;
+use App\Services\SpeciesArt;
 use Database\Seeders\MilestoneSeeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +60,7 @@ it('makes a snapshot and an evidence mirror that pass the restore test', functio
     expect($result)->toMatchArray([
         'ok' => true,
         'integrity' => 'ok',
-        'milestones' => 54,
+        'milestones' => 60,
         'submissions' => 1,
         'images' => 2,
         'missing_files' => [],
@@ -76,6 +78,14 @@ it('copies only new evidence files on the next run', function () {
 
     expect($first['evidence_copied'])->toBe(3) // original, display copy, thumbnail
         ->and($second['evidence_copied'])->toBe(0);
+});
+
+it('mirrors uploaded species images', function () {
+    $key = app(SpeciesArt::class)->store(Images::png('dodo.png', 300, 200), 'REX');
+    Species::query()->where('code', 'REX')->update(['image' => $key]);
+
+    expect(app(BackupService::class)->run()['evidence_copied'])->toBe(1);
+    Storage::disk('backup')->assertExists('backups/'.$key);
 });
 
 it('fails the restore test when evidence is missing from the mirror', function () {

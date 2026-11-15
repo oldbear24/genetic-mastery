@@ -52,6 +52,7 @@ return [
             'milestone_required' => 'Vyberte druh a stat.',
             'already_verified' => 'Tento milník už je ověřený. Vyberte jiný.',
             'already_pending' => 'U tohoto milníku už máte žádost, která čeká na schválení.',
+            'disabled' => 'Tento milník se v clusteru nepoužívá. Vyberte jiný.',
             'rate_hour' => 'Za hodinu jde poslat nejvýš :max žádostí. Další pošlete později.',
             'rate_day' => 'Za den jde poslat nejvýš :max žádostí. Další pošlete zítra.',
         ],

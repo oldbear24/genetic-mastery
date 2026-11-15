@@ -42,6 +42,7 @@
                 </a>
                 <a href="{{ route('admin.submissions') }}" class="nav-link" @if ($current === 'submissions') aria-current="page" @endif>{{ __('app.nav.all_submissions') }}</a>
                 <a href="{{ route('admin.audit') }}" class="nav-link" @if ($current === 'audit') aria-current="page" @endif>{{ __('app.nav.audit_log') }}</a>
+                <a href="{{ route('admin.species') }}" class="nav-link" @if ($current === 'species') aria-current="page" @endif>{{ __('app.nav.species') }}</a>
                 <a href="{{ route('home') }}" class="nav-link">{{ __('app.nav.milestones') }}</a>
             @else
                 <a href="{{ route('home') }}" class="nav-link" @if ($current === 'milestones') aria-current="page" @endif>{{ __('app.nav.milestones') }}</a>

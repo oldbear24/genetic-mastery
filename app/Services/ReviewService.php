@@ -39,11 +39,16 @@ class ReviewService
             return DB::transaction(function () use ($admin, $submission, $publicNote, $confirmLater) {
                 // PostgreSQL: serialise decisions on one milestone. SQLite holds
                 // the database write lock from BEGIN IMMEDIATE already.
-                Milestone::query()->whereKey($submission->milestone_id)->lockForUpdate()->first();
+                $milestone = Milestone::query()->whereKey($submission->milestone_id)->lockForUpdate()->first();
                 $current = Submission::query()->whereKey($submission->id)->lockForUpdate()->firstOrFail();
 
                 if ($current->status !== SubmissionStatus::Pending) {
                     throw new DecisionRefused(__('admin.errors.not_pending', ['id' => $current->public_id, 'status' => $current->status->label()]));
+                }
+
+                // A switched off milestone would not count; the claim can still be rejected.
+                if (! $milestone?->isActive()) {
+                    throw new DecisionRefused(__('admin.errors.milestone_disabled'));
                 }
 
                 if (Submission::query()->verified()->where('milestone_id', $current->milestone_id)->exists()) {

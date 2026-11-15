@@ -40,6 +40,9 @@ class AuditLog extends Model
         'submission.reopened_after_revoke',
         'submission.verifier_changed',
         'note.added',
+        'species.created',
+        'species.updated',
+        'species.moved',
     ];
 
     protected static function booted(): void

@@ -28,6 +28,9 @@ class PlayerMilestones
 
     public const LOCKED = 'locked';
 
+    /** The stat is switched off for this species: no claims, does not count. */
+    public const DISABLED = 'disabled';
+
     /** @var array<int, array{state: string, submission: Submission|null}> */
     private array $states = [];
 
@@ -52,15 +55,16 @@ class PlayerMilestones
         return new self($player, $milestones ?? app(ClusterProgress::class)->milestones());
     }
 
+    /** Milestones outside the board (species switched off) are DISABLED. */
     public function state(Milestone $milestone): string
     {
-        return $this->states[$milestone->id]['state'];
+        return $this->states[$milestone->id]['state'] ?? self::DISABLED;
     }
 
     /** The submission behind the player's state (own pending or rejected claim). */
     public function submission(Milestone $milestone): ?Submission
     {
-        return $this->states[$milestone->id]['submission'];
+        return $this->states[$milestone->id]['submission'] ?? null;
     }
 
     /** A new claim is possible for LOCKED and PENDING milestones without an own pending claim (HR-3, SUB-5). */
@@ -72,6 +76,10 @@ class PlayerMilestones
     /** @param Collection<int, Submission>|null $own */
     private function resolve(Milestone $milestone, ?Collection $own): array
     {
+        if (! $milestone->isActive()) {
+            return ['state' => self::DISABLED, 'submission' => null];
+        }
+
         $verified = $milestone->verifiedSubmission;
 
         if ($verified !== null) {
